@@ -1,0 +1,11 @@
+services:
+  - type: web
+    name: noghunter-pro-api
+    env: node
+    buildCommand: npm install && npm run build && npx playwright install chromium --with-deps
+    startCommand: npm start
+    envVars:
+      - key: MONGO_URI
+        sync: false
+      - key: GEMINI_API_KEY
+        sync: false
