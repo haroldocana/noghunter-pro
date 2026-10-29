@@ -3,6 +3,7 @@ import dotenv from 'dotenv';
 import cron from 'node-cron';
 import { connectDB } from './config/database';
 import { runNogHunterMotor } from './scraper/guatecompras';
+import nogRoutes from './routes/nogRoutes';
 
 dotenv.config();
 
@@ -11,6 +12,9 @@ app.use(express.json());
 
 // Conectar a MongoDB
 connectDB();
+
+// Activar las rutas de la API para conectar el Frontend (React) con la Base de Datos
+app.use(nogRoutes);
 
 // Programar el Scraper para que corra de Lunes a Viernes a las 8:00 AM, 12:00 PM y 4:00 PM
 cron.schedule('0 8,12,16 * * 1-5', async () => {
