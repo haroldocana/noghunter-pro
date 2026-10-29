@@ -1,5 +1,20 @@
-"scripts": {
-  "build": "tsc",
-  "start": "node dist/index.js",
-  "dev": "ts-node src/index.ts"
+{
+  "name": "noghunter-pro",
+  "version": "1.0.0",
+  "description": "Servidor NOGHunter Pro",
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "dev": "ts-node src/index.ts"
+  },
+  "dependencies": {
+    "express": "^4.21.1"
+  },
+  "devDependencies": {
+    "typescript": "^5.0.0",
+    "ts-node": "^10.9.1",
+    "@types/node": "^20.0.0",
+    "@types/express": "^4.17.17"
+  }
 }
