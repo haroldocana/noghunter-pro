@@ -30,8 +30,8 @@ export default function App() {
   useEffect(() => {
     if (currentView === 'CLIENT') {
       setIsLoading(true);
-      // Simulación de fetch al backend - Si falla o está vacío, cargamos datos de muestra para ver la UI
-      fetch('/api/nogs')
+      // Petición conectada a tu backend en Render
+      fetch('https://noghunter-pro.onrender.com/api/nogs')
         .then((res) => res.json())
         .then((data) => {
           if (Array.isArray(data) && data.length > 0) {
