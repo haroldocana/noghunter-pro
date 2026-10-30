@@ -14,14 +14,11 @@ export default function App() {
   const [successMsg, setSuccessMsg] = useState('');
   const [errorMsg, setErrorMsg] = useState('');
 
-  const [companies] = useState([
-    { id: 1, name: 'Servinformación Guatemala', status: 'ACTIVE', aiTotal: 50000, aiUsed: 12400, users: 5 },
-    { id: 2, name: 'Comptech Latam', status: 'ACTIVE', aiTotal: 50000, aiUsed: 48000, users: 3 }
-  ]);
+  // ==========================================
+  // NUEVO: ESTADO DINÁMICO PARA EL SUPERADMIN
+  // ==========================================
+  const [companies, setCompanies] = useState<any[]>([]);
 
-  // ==========================================
-  // NUEVO: LOGIN REAL CONECTADO AL BACKEND
-  // ==========================================
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
@@ -36,7 +33,6 @@ export default function App() {
       const data = await response.json();
 
       if (response.ok) {
-        // El servidor nos dice si es MASTER (tú) o un cliente normal
         if (data.user.role === 'MASTER') {
           setCurrentView('SUPERADMIN');
         } else {
@@ -91,6 +87,7 @@ export default function App() {
     }
   };
 
+  // Carga de oportunidades para los clientes
   useEffect(() => {
     if (currentView === 'CLIENT') {
       setIsLoading(true);
@@ -108,6 +105,22 @@ export default function App() {
           cargarDatosMuestra();
           setIsLoading(false);
         });
+    }
+  }, [currentView]);
+
+  // ==========================================
+  // NUEVO: CARGA DINÁMICA DE EMPRESAS (SUPERADMIN)
+  // ==========================================
+  useEffect(() => {
+    if (currentView === 'SUPERADMIN') {
+      fetch('https://noghunter-pro.onrender.com/api/admin/tenants')
+        .then((res) => res.json())
+        .then((data) => {
+          if (Array.isArray(data)) {
+            setCompanies(data);
+          }
+        })
+        .catch((err) => console.error('Error cargando las empresas:', err));
     }
   }, [currentView]);
 
@@ -284,14 +297,14 @@ export default function App() {
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {companies.map(company => (
-              <div key={company.id} className="bg-slate-800 rounded-xl p-6 border border-slate-700">
+              <div key={company.id || company._id} className="bg-slate-800 rounded-xl p-6 border border-slate-700">
                 <div className="flex justify-between items-start mb-4">
                   <h3 className="text-lg font-bold">{company.name}</h3>
                   <span className="text-xs font-bold px-2 py-1 rounded bg-emerald-900 text-emerald-400">{company.status}</span>
                 </div>
                 <div className="space-y-3 mb-6 text-sm">
                   <div className="flex justify-between"><span className="text-slate-400">Usuarios:</span><span className="font-medium">{company.users} / 5 Max</span></div>
-                  <div className="flex justify-between"><span className="text-slate-400">Bolsón IA:</span><span className="text-emerald-400 font-medium">{company.aiUsed.toLocaleString()} / {company.aiTotal.toLocaleString()}</span></div>
+                  <div className="flex justify-between"><span className="text-slate-400">Bolsón IA:</span><span className="text-emerald-400 font-medium">{company.aiUsed?.toLocaleString()} / {company.aiTotal?.toLocaleString()}</span></div>
                 </div>
                 <button className="w-full bg-slate-700 hover:bg-slate-600 text-white py-2 rounded text-sm font-medium transition-colors">Generar Credenciales</button>
               </div>
