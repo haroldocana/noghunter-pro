@@ -17,36 +17,62 @@
         <form onSubmit={handleCreateCompanySubmit} className="space-y-4">
           <div>
             <label className="block text-xs font-semibold text-slate-400 mb-1 uppercase">Nombre de la Empresa</label>
-            <input type="text" required value={newCompanyForm.companyName} 
+            <input 
+              type="text" 
+              required 
+              value={newCompanyForm.companyName} 
               onChange={(e) => setNewCompanyForm({...newCompanyForm, companyName: e.target.value})}
-              className="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-2 text-white outline-none focus:border-blue-500" placeholder="Ej. Soluciones Seguras" />
+              className="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-2 text-white outline-none focus:border-blue-500" 
+              placeholder="Ej. Soluciones Seguras" 
+            />
           </div>
           <div>
             <label className="block text-xs font-semibold text-slate-400 mb-1 uppercase">NIT</label>
-            <input type="text" required value={newCompanyForm.nit} 
+            <input 
+              type="text" 
+              required 
+              value={newCompanyForm.nit} 
               onChange={(e) => setNewCompanyForm({...newCompanyForm, nit: e.target.value})}
-              className="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-2 text-white outline-none focus:border-blue-500" placeholder="Ej. 883921-9" />
+              className="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-2 text-white outline-none focus:border-blue-500" 
+              placeholder="Ej. 883921-9" 
+            />
           </div>
           <div>
             <label className="block text-xs font-semibold text-slate-400 mb-1 uppercase">Nombre del Admin</label>
-            <input type="text" required value={newCompanyForm.adminName} 
+            <input 
+              type="text" 
+              required 
+              value={newCompanyForm.adminName} 
               onChange={(e) => setNewCompanyForm({...newCompanyForm, adminName: e.target.value})}
-              className="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-2 text-white outline-none focus:border-blue-500" placeholder="Ej. Carlos Mendoza" />
+              className="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-2 text-white outline-none focus:border-blue-500" 
+              placeholder="Ej. Carlos Mendoza" 
+            />
           </div>
           <div>
             <label className="block text-xs font-semibold text-slate-400 mb-1 uppercase">Correo del Admin (Login)</label>
-            <input type="email" required value={newCompanyForm.adminEmail} 
+            <input 
+              type="email" 
+              required 
+              value={newCompanyForm.adminEmail} 
               onChange={(e) => setNewCompanyForm({...newCompanyForm, adminEmail: e.target.value})}
-              className="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-2 text-white outline-none focus:border-blue-500" placeholder="carlos@empresa.com" />
+              className="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-2 text-white outline-none focus:border-blue-500" 
+              placeholder="carlos@empresa.com" 
+            />
           </div>
 
           <div className="flex gap-3 pt-4">
-            <button type="button" onClick={() => setShowNewCompanyModal(false)}
-              className="flex-1 bg-slate-700 hover:bg-slate-600 text-white font-medium py-2 rounded-lg transition-colors">
+            <button 
+              type="button" 
+              onClick={() => setShowNewCompanyModal(false)}
+              className="flex-1 bg-slate-700 hover:bg-slate-600 text-white font-medium py-2 rounded-lg transition-colors"
+            >
               Cancelar
             </button>
-            <button type="submit" disabled={creatingCompany}
-              className="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 rounded-lg transition-colors disabled:opacity-50">
+            <button 
+              type="submit" 
+              disabled={creatingCompany}
+              className="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 rounded-lg transition-colors disabled:opacity-50"
+            >
               {creatingCompany ? 'Creando...' : 'Guardar y Enviar'}
             </button>
           </div>
