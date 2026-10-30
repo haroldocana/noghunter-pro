@@ -18,7 +18,7 @@ const CompanySchema = new Schema({
   deliveryMethod: { type: String, enum: ['CRM', 'EMAIL', 'DASHBOARD'], default: 'DASHBOARD' }, 
   crmType: { type: String, enum: ['ZOHO', 'HUBSPOT', 'PIPEDRIVE', 'SALESFORCE', 'WEBHOOK', 'NONE'], default: 'NONE' },
   crmWebhookUrl: { type: String },
-  crmApiKey: { type: String }, // Se guarda la llave para CRMs que exigen autenticación
+  crmApiKey: { type: String }, 
   
   isActive: { type: Boolean, default: true },
   createdAt: { type: Date, default: Date.now }
