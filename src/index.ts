@@ -1,33 +1,28 @@
-import bcrypt from 'bcryptjs';
-import User from './models/User';
+import express from 'express';
+import cors from 'cors';
+import { connectDB } from './config/database';
+import authRoutes from './routes/authRoutes';
+// ... importa tus otras rutas o modelos aquí si los tienes en este mismo archivo
 
-const seedSuperAdmin = async () => {
-  try {
-    const adminEmail = 'haroldocana@comptech.lat';
-    const existingAdmin = await User.findOne({ email: adminEmail });
+const app = express();
 
-    const hashedPassword = await bcrypt.hash('Admin123*', 10);
+// Middlewares básicos
+app.use(cors());
+app.use(express.json());
 
-    if (existingAdmin) {
-      existingAdmin.passwordHash = hashedPassword;
-      existingAdmin.role = 'MASTER';
-      await existingAdmin.save();
-      console.log('✔ SuperAdmin verificado y actualizado con éxito.');
-    } else {
-      await User.create({
-        email: adminEmail,
-        passwordHash: hashedPassword,
-        role: 'MASTER',
-        fullName: 'Harold Ocaña',
-        isActive: true
-      });
-      console.log('✔ SuperAdmin creado exitosamente en la BD.');
-    }
-  } catch (error) {
-    console.warn('⚠️ Advertencia: No se pudo sembrar el SuperAdmin en este instante, la app continuará ejecutándose:', error);
-    // Nota: No usamos process.exit() para evitar que Render apague la aplicación por un timeout de red.
-  }
-};
+// Tus rutas de la API
+app.use('/api/auth', authRoutes);
+// app.use('/api/tenants', tenantRoutes); // Tus demás rutas
 
-// Ejecutar tras iniciar conexión (dando un margen prudente de 5 segundos)
-setTimeout(seedSuperAdmin, 5000);
+// Conectar a MongoDB y arrancar el servidor Express de forma estable
+const PORT = process.env.PORT || 10000;
+
+connectDB()
+  .then(() => {
+    app.listen(PORT, () => {
+      console.log(`🚀 Servidor corriendo exitosamente en el puerto ${PORT}`);
+    });
+  })
+  .catch((err) => {
+    console.error('❌ Error crítico al iniciar la base de datos:', err);
+  });
