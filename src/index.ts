@@ -1,40 +1,34 @@
 import express from 'express';
+import cors from 'cors';
 import dotenv from 'dotenv';
-import cron from 'node-cron';
-import { connectDB } from './config/database';
-import { runNogHunterMotor } from './scraper/guatecompras';
+import { connectDB } from './config/db';
 import nogRoutes from './routes/nogRoutes';
-import paymentRoutes from './routes/paymentRoutes';
 
 dotenv.config();
 
 const app = express();
+const PORT = process.env.PORT || 10000;
+
+// Habilitar CORS para que tu frontend en Render se comunique con el backend
+app.use(cors({
+  origin: '*',
+  methods: ['GET', 'POST', 'PUT', 'DELETE'],
+  allowedHeaders: ['Content-Type', 'Authorization']
+}));
+
 app.use(express.json());
 
-// Conectar a MongoDB
+// Conexión a la Base de Datos y arranque
 connectDB();
 
-// Activar las rutas de la plataforma para conectar frontend, backend y pagos
-app.use(nogRoutes);
-app.use(paymentRoutes); // <-- Ruta receptora de pagos de Pagalo/QPayPro activada
+// Rutas de la API
+app.use('/api', nogRoutes);
 
-// Programar el Scraper para que corra de Lunes a Viernes a las 8:00 AM, 12:00 PM y 4:00 PM
-cron.schedule('0 8,12,16 * * 1-5', async () => {
-  console.log('⏰ Ejecutando tarea programada: Extracción de Guatecompras');
-  await runNogHunterMotor();
-});
-
+// Ruta de prueba raíz
 app.get('/', (req, res) => {
-  res.send('Motor NOGHunter Pro activo, conectado a BD y con extracciones programadas.');
+  res.json({ status: 'API de NOGHunter Pro funcionando al 100%' });
 });
 
-// Ruta manual para forzar la búsqueda sin esperar la hora programada (Ideal para tus pruebas)
-app.get('/api/trigger-scraper', async (req, res) => {
-  res.json({ message: 'Scraper iniciado en segundo plano.' });
-  await runNogHunterMotor();
-});
-
-const PORT = process.env.PORT || 10000;
 app.listen(PORT, () => {
-  console.log(`Servidor de NOGHunter Pro escuchando en el puerto ${PORT}`);
+  console.log(`Servidor corriendo exitosamente en el puerto ${PORT}`);
 });
