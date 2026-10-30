@@ -15,7 +15,7 @@ const transporter = nodemailer.createTransport({
 
 export const sendProvisioningEmails = async (companyData: any, userData: any, tempPassword: string) => {
   try {
-    // 1. Correo de bienvenida para el cliente
+    // 1. Correo de bienvenida para el cliente (Tu diseño)
     const clientMailOptions = {
       from: '"NOGHunter Pro" <no-reply@noghunter.com>',
       to: userData.email,
@@ -66,24 +66,23 @@ export const sendProvisioningEmails = async (companyData: any, userData: any, te
               <li style="margin-bottom: 8px;"><strong>NIT:</strong> ${companyData.nit}</li>
               <li style="margin-bottom: 8px;"><strong>Contacto:</strong> ${userData.fullName}</li>
               <li style="margin-bottom: 8px;"><strong>Email Admin:</strong> ${userData.email}</li>
-              <li style="margin-bottom: 8px;"><strong>Límite de Usuarios:</strong> ${companyData.maxUsers || 5}</li>
-              <li><strong>Bolsón IA:</strong> ${(companyData.aiQuotaTotal || 50000).toLocaleString()} tokens</li>
             </ul>
           </div>
         </div>
       `
     };
 
+    // Ejecutar ambos envíos simultáneamente
     await Promise.all([
       transporter.sendMail(clientMailOptions),
       transporter.sendMail(masterMailOptions)
     ]);
     
-    console.log(`📧 Correos de aprovisionamiento enviados exitosamente para ${companyData.name}`);
+    console.log(`📧 Correos enviados exitosamente.`);
     return true;
 
   } catch (error) {
-    console.error('❌ Error al enviar los correos de aprovisionamiento:', error);
+    console.error('❌ Error al enviar los correos:', error);
     return false;
   }
 };
