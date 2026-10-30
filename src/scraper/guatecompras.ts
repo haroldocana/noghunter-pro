@@ -17,7 +17,9 @@ export const runNogHunterMotor = async () => {
   const page = await context.newPage();
 
   try {
-    await page.goto('https://www.guatecompras.gt/concursos/consultaConcursos.aspx?o=1&d=1', { waitUntil: 'networkidle' });
+    await page.goto('https://www.guatecompras.gt/concursos/consultaConcursos.aspx?o=1&d=1', { 
+      waitUntil: 'networkidle' 
+    });
     console.log('Página principal cargada.');
 
     for (const cat of GUATECOMPRAS_CATEGORIAS) {
