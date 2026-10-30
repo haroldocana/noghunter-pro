@@ -1,7 +1,7 @@
 import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
-import { connectDB } from './config/db';
+import { connectDB } from './config/db'; // Asegúrate de ajustar la ruta según tu estructura
 import nogRoutes from './routes/nogRoutes';
 
 dotenv.config();
@@ -11,7 +11,7 @@ const PORT = process.env.PORT || 10000;
 
 // Habilitar CORS para que tu frontend en Render se comunique con el backend
 app.use(cors({
-  origin: '*',
+  origin: '*', // O puedes poner la URL exacta de tu frontend: 'https://noghunter-pro-1.onrender.com'
   methods: ['GET', 'POST', 'PUT', 'DELETE'],
   allowedHeaders: ['Content-Type', 'Authorization']
 }));
