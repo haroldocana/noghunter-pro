@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { Target, CheckCircle, XCircle, Search, ArrowLeft } from 'lucide-react';
 
 export default function App() {
-  // Ahora tenemos un nuevo estado: CHECKOUT
   const [currentView, setCurrentView] = useState<'LANDING' | 'CHECKOUT' | 'LOGIN' | 'CLIENT' | 'SUPERADMIN'>('LANDING');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -10,7 +9,6 @@ export default function App() {
   const [nogs, setNogs] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(false);
 
-  // Estados para el formulario de Checkout
   const [formData, setFormData] = useState({ companyName: '', nit: '', adminName: '', adminEmail: '' });
   const [checkoutLoading, setCheckoutLoading] = useState(false);
   const [successMsg, setSuccessMsg] = useState('');
@@ -21,14 +19,36 @@ export default function App() {
     { id: 2, name: 'Comptech Latam', status: 'ACTIVE', aiTotal: 50000, aiUsed: 48000, users: 3 }
   ]);
 
-  const handleLogin = (e: React.FormEvent) => {
+  // ==========================================
+  // NUEVO: LOGIN REAL CONECTADO AL BACKEND
+  // ==========================================
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (email && password) {
-      if (email === 'admin@noghunter.com') {
-        setCurrentView('SUPERADMIN');
+    setIsLoading(true);
+
+    try {
+      const response = await fetch('https://noghunter-pro.onrender.com/api/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password })
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        // El servidor nos dice si es MASTER (tú) o un cliente normal
+        if (data.user.role === 'MASTER') {
+          setCurrentView('SUPERADMIN');
+        } else {
+          setCurrentView('CLIENT');
+        }
       } else {
-        setCurrentView('CLIENT');
+        alert(data.error || 'Credenciales inválidas'); 
       }
+    } catch (error) {
+      alert('Error de conexión al iniciar sesión');
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -234,8 +254,8 @@ export default function App() {
               <label className="block text-sm font-medium text-slate-700 mb-1">Contraseña</label>
               <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-600 outline-none" placeholder="••••••••" required />
             </div>
-            <button type="submit" className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2.5 rounded-lg shadow-sm">
-              Ingresar al Panel
+            <button type="submit" disabled={isLoading} className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2.5 rounded-lg shadow-sm disabled:opacity-50">
+              {isLoading ? 'Ingresando...' : 'Ingresar al Panel'}
             </button>
           </form>
         </div>
