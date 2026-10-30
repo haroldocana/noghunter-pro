@@ -1,30 +1,29 @@
 import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
-import { connectDB } from './config/database'; // Importación corregida para coincidir con database.ts
+import { connectDB } from './config/database'; 
 import nogRoutes from './routes/nogRoutes';
+import paymentRoutes from './routes/paymentRoutes'; // Importar el webhook de pagos
 
 dotenv.config();
 
 const app = express();
 const PORT = process.env.PORT || 10000;
 
-// Habilitar CORS para que tu frontend en Render se comunique con el backend
 app.use(cors({
-  origin: '*', // O puedes poner la URL exacta de tu frontend: 'https://noghunter-pro-1.onrender.com'
+  origin: '*',
   methods: ['GET', 'POST', 'PUT', 'DELETE'],
   allowedHeaders: ['Content-Type', 'Authorization']
 }));
 
 app.use(express.json());
 
-// Conexión a la Base de Datos y arranque
 connectDB();
 
-// Rutas de la API
+// Montar las rutas (La URL del webhook será /api/payments/webhook)
 app.use('/api', nogRoutes);
+app.use('/api', paymentRoutes);
 
-// Ruta de prueba raíz
 app.get('/', (req, res) => {
   res.json({ status: 'API de NOGHunter Pro funcionando al 100%' });
 });
