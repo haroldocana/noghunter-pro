@@ -2,15 +2,20 @@ import React, { useState, useEffect } from 'react';
 import { Target, CheckCircle, XCircle, Search, ArrowLeft } from 'lucide-react';
 
 export default function App() {
-  // Manejador de vistas: LANDING (Pública), LOGIN, CLIENT (Dashboard), SUPERADMIN
-  const [currentView, setCurrentView] = useState<'LANDING' | 'LOGIN' | 'CLIENT' | 'SUPERADMIN'>('LANDING');
+  // Ahora tenemos un nuevo estado: CHECKOUT
+  const [currentView, setCurrentView] = useState<'LANDING' | 'CHECKOUT' | 'LOGIN' | 'CLIENT' | 'SUPERADMIN'>('LANDING');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   
   const [nogs, setNogs] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(false);
 
-  // Simulación para tu panel SuperAdmin
+  // Estados para el formulario de Checkout
+  const [formData, setFormData] = useState({ companyName: '', nit: '', adminName: '', adminEmail: '' });
+  const [checkoutLoading, setCheckoutLoading] = useState(false);
+  const [successMsg, setSuccessMsg] = useState('');
+  const [errorMsg, setErrorMsg] = useState('');
+
   const [companies] = useState([
     { id: 1, name: 'Servinformación Guatemala', status: 'ACTIVE', aiTotal: 50000, aiUsed: 12400, users: 5 },
     { id: 2, name: 'Comptech Latam', status: 'ACTIVE', aiTotal: 50000, aiUsed: 48000, users: 3 }
@@ -27,10 +32,48 @@ export default function App() {
     }
   };
 
+  const handleCheckoutChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
+
+  const handleCheckoutSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setCheckoutLoading(true);
+    setErrorMsg('');
+    setSuccessMsg('');
+
+    try {
+      const response = await fetch('https://noghunter-pro.onrender.com/api/payments/webhook', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          transactionId: `TXN-${Math.floor(Math.random() * 1000000)}`,
+          companyName: formData.companyName,
+          nit: formData.nit,
+          adminName: formData.adminName,
+          adminEmail: formData.adminEmail,
+          amount: 12500
+        }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        setSuccessMsg('¡Pago exitoso! El entorno de tu empresa ha sido creado. Revisa tu correo electrónico para obtener tus credenciales de acceso.');
+        setFormData({ companyName: '', nit: '', adminName: '', adminEmail: '' });
+      } else {
+        setErrorMsg(data.error || 'Ocurrió un error al procesar la compra.');
+      }
+    } catch (error) {
+      setErrorMsg('Error de conexión con el servidor. Intenta de nuevo.');
+    } finally {
+      setCheckoutLoading(false);
+    }
+  };
+
   useEffect(() => {
     if (currentView === 'CLIENT') {
       setIsLoading(true);
-      // Petición conectada a tu backend en Render
       fetch('https://noghunter-pro.onrender.com/api/nogs')
         .then((res) => res.json())
         .then((data) => {
@@ -50,22 +93,8 @@ export default function App() {
 
   const cargarDatosMuestra = () => {
     setNogs([
-      {
-        id: "9876543",
-        nog: "9876543",
-        title: "Adquisición de Licencias en la Nube y Ciberseguridad",
-        buyer: "Ministerio de Finanzas Públicas",
-        matchScore: 92,
-        summary: ["Se requiere licenciamiento tipo Google Workspace", "Protección perimetral necesaria", "Alta viabilidad para tus servicios"]
-      },
-      {
-        id: "1234567",
-        nog: "1234567",
-        title: "Servicios de Limpieza para Oficinas Centrales",
-        buyer: "Ministerio de Salud",
-        matchScore: 12,
-        summary: ["Servicio de limpieza y conserjería", "No requiere tecnología ni nube", "Descartado automáticamente"]
-      }
+      { id: "9876543", nog: "9876543", title: "Adquisición de Licencias en la Nube y Ciberseguridad", buyer: "Ministerio de Finanzas Públicas", matchScore: 92, summary: ["Se requiere licenciamiento tipo Google Workspace", "Protección perimetral necesaria", "Alta viabilidad para tus servicios"] },
+      { id: "1234567", nog: "1234567", title: "Servicios de Limpieza para Oficinas Centrales", buyer: "Ministerio de Salud", matchScore: 12, summary: ["Servicio de limpieza y conserjería", "No requiere tecnología ni nube", "Descartado automáticamente"] }
     ]);
   };
 
@@ -80,10 +109,7 @@ export default function App() {
             <Target className="text-blue-600" />
             <span className="text-blue-700">NOGHunter</span><span className="text-slate-900">Pro</span>
           </div>
-          <button 
-            onClick={() => setCurrentView('LOGIN')}
-            className="text-sm font-semibold text-slate-600 hover:text-blue-700 transition-colors"
-          >
+          <button onClick={() => setCurrentView('LOGIN')} className="text-sm font-semibold text-slate-600 hover:text-blue-700 transition-colors">
             Iniciar Sesión
           </button>
         </header>
@@ -94,7 +120,7 @@ export default function App() {
             <span className="text-blue-600">Impulsado por Inteligencia Artificial.</span>
           </h1>
           <p className="text-xl text-slate-500 mb-10 max-w-2xl mx-auto">
-            Olvida los laboriosos "laboratorios de reglas". NOGHunter Pro utiliza Gemini AI para leer bases de licitación y enviar los negocios pre-calificados directo a tu CRM (Zoho, HubSpot, Pipedrive).
+            Olvida los laboriosos "laboratorios de reglas". NOGHunter Pro utiliza Gemini AI para leer bases de licitación y enviar los negocios pre-calificados directo a tu CRM (Zoho, HubSpot, Pipedrive, Odoo).
           </p>
         </section>
 
@@ -115,7 +141,7 @@ export default function App() {
               <div className="text-sm text-slate-400 mb-6">Facturación anual</div>
               
               <button 
-                onClick={() => alert('Aquí se abrirá el popup de Pagalo o QPayPro para procesar el cobro en Bi o G&T')}
+                onClick={() => setCurrentView('CHECKOUT')}
                 className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 rounded-xl shadow-lg transition-transform hover:scale-105"
               >
                 Suscribirse y Pagar
@@ -126,6 +152,59 @@ export default function App() {
             </div>
           </div>
         </section>
+      </div>
+    );
+  }
+
+  // ==========================================
+  // VISTA 1.5: CHECKOUT (COMPRA)
+  // ==========================================
+  if (currentView === 'CHECKOUT') {
+    return (
+      <div className="min-h-screen bg-slate-50 flex flex-col items-center justify-center p-4 relative">
+        <button onClick={() => setCurrentView('LANDING')} className="absolute top-6 left-6 text-sm text-slate-500 hover:text-slate-800 flex items-center gap-1">
+          <ArrowLeft size={16} /> Volver
+        </button>
+        
+        <div className="max-w-md w-full bg-white rounded-2xl shadow-xl p-8 space-y-6 border border-slate-100">
+          <div className="text-center mb-6">
+            <h2 className="text-2xl font-bold text-slate-900">Finalizar Compra</h2>
+            <p className="text-slate-500 text-sm mt-1">Configura tu espacio corporativo de NOGHunter Pro.</p>
+          </div>
+
+          {successMsg && <div className="bg-green-50 border border-green-200 text-green-700 p-4 rounded-lg text-sm">{successMsg}</div>}
+          {errorMsg && <div className="bg-red-50 border border-red-200 text-red-700 p-4 rounded-lg text-sm">{errorMsg}</div>}
+
+          {!successMsg && (
+            <form onSubmit={handleCheckoutSubmit} className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-1">Nombre de la Empresa</label>
+                <input type="text" name="companyName" value={formData.companyName} onChange={handleCheckoutChange} required
+                  className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-600 outline-none" placeholder="Ej. Servinformación" />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-1">NIT</label>
+                <input type="text" name="nit" value={formData.nit} onChange={handleCheckoutChange} required
+                  className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-600 outline-none" placeholder="123456-7" />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-1">Nombre del Administrador</label>
+                <input type="text" name="adminName" value={formData.adminName} onChange={handleCheckoutChange} required
+                  className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-600 outline-none" placeholder="Ej. Juan Pérez" />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-1">Correo Electrónico (Login)</label>
+                <input type="email" name="adminEmail" value={formData.adminEmail} onChange={handleCheckoutChange} required
+                  className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-600 outline-none" placeholder="juan@empresa.com" />
+              </div>
+
+              <button type="submit" disabled={checkoutLoading}
+                className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-lg transition-colors mt-4 disabled:opacity-50">
+                {checkoutLoading ? 'Procesando Pago y Creando Entorno...' : 'Pagar Q12,500 y Activar'}
+              </button>
+            </form>
+          )}
+        </div>
       </div>
     );
   }
