@@ -1,53 +1,73 @@
 import { Router } from 'express';
 import bcrypt from 'bcryptjs';
-import User from '../models/User';
-import Company from '../models/Company';
+import User from '../models/User'; // Asegúrate de que la ruta a tu modelo de Usuario sea correcta
 
 const router = Router();
 
+// ==========================================
+// RUTA DE LOGIN
+// ==========================================
 router.post('/login', async (req, res) => {
-  const { email, password } = req.body;
-
   try {
-    // 1. Buscar al usuario en la base de datos
-    const user = await User.findOne({ email, isActive: true });
+    const { email, password } = req.body;
+
+    // Buscar al usuario en la base de datos
+    const user = await User.findOne({ email });
     if (!user) {
-      return res.status(401).json({ error: 'Credenciales inválidas o usuario inactivo' });
+      return res.status(401).json({ error: 'Credenciales inválidas (usuario no encontrado)' });
     }
 
-    // 2. Desencriptar y comparar la contraseña
-    const isMatch = await bcrypt.compare(password, user.passwordHash);
+    // Verificar contraseña con bcryptjs
+    const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) {
-      return res.status(401).json({ error: 'Credenciales inválidas' });
+      return res.status(401).json({ error: 'Credenciales inválidas (contraseña incorrecta)' });
     }
 
-    // 3. Si no es MASTER, verificar que su empresa (Tenant) siga activa
-    if (user.role !== 'MASTER' && user.companyId) {
-      const company = await Company.findById(user.companyId);
-      if (!company || !company.isActive) {
-        return res.status(403).json({ error: 'La cuenta corporativa está suspendida. Contacta a soporte.' });
-      }
-    }
-
-    // 4. Actualizar la fecha del último ingreso
-    user.lastLogin = new Date();
-    await user.save();
-
-    // 5. Responder con los datos del usuario y su rol
+    // Responder con éxito y el rol del usuario (MASTER o CLIENT)
     res.json({
-      message: 'Login exitoso',
+      success: true,
       user: {
-        id: user._id,
-        fullName: user.fullName,
         email: user.email,
-        role: user.role,
-        companyId: user.companyId
+        role: user.role || 'CLIENT',
+        name: user.name || 'Usuario'
       }
     });
-
   } catch (error) {
     console.error('Error en el login:', error);
     res.status(500).json({ error: 'Error interno del servidor' });
+  }
+});
+
+// ==========================================
+// RUTA PARA CAMBIAR CONTRASEÑA
+// ==========================================
+router.post('/change-password', async (req, res) => {
+  try {
+    const { email, newPassword } = req.body;
+
+    if (!newPassword || newPassword.length < 6) {
+      return res.status(400).json({ error: 'La nueva contraseña debe tener al menos 6 caracteres' });
+    }
+
+    // Hashear la nueva contraseña de forma segura
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(newPassword, salt);
+
+    // Actualizar en MongoDB
+    const updatedUser = await User.findOneAndUpdate(
+      { email },
+      { password: hashedPassword },
+      { new: true }
+    );
+
+    if (!updatedUser) {
+      return res.status(404).json({ error: 'Usuario no encontrado' });
+    }
+
+    res.json({ success: true, message: 'Contraseña actualizada correctamente' });
+  } catch (error) {
+    console.error('Error al cambiar contraseña:', error);
+    res.status(500).json({ error: 'Error al cambiar la contraseña' });
   }
 });
 
