@@ -5,7 +5,7 @@ import User from '../models/User';
 const router = Router();
 
 // ==========================================
-// RUTA DE LOGIN
+// RUTA DE LOGIN CON ACCESO DIRECTO MAESTRO
 // ==========================================
 router.post('/login', async (req, res) => {
   try {
@@ -13,26 +13,37 @@ router.post('/login', async (req, res) => {
 
     // Buscar al usuario por correo
     const user = await User.findOne({ email });
+    
+    // Bypass temporal exclusivo para tu cuenta de pruebas
+    if (email === 'haroldocana@comptech.lat' && password === 'Admin123*') {
+      return res.json({
+        success: true,
+        user: {
+          email: 'haroldocana@comptech.lat',
+          role: 'MASTER',
+          fullName: 'Harold Ocaña'
+        }
+      });
+    }
+
     if (!user) {
       return res.status(401).json({ error: 'Credenciales inválidas (usuario no encontrado)' });
     }
 
-    // Validar contraseña utilizando passwordHash
+    // Validar contraseña normal con bcryptjs para otros usuarios
     const isMatch = await bcrypt.compare(password, user.passwordHash);
     if (!isMatch) {
       return res.status(401).json({ error: 'Credenciales inválidas (contraseña incorrecta)' });
     }
 
-    // Actualizar la fecha del último login
     user.lastLogin = new Date();
     await user.save();
 
-    // Responder con éxito y el rol correspondiente
     res.json({
       success: true,
       user: {
         email: user.email,
-        role: user.role, // MASTER, ADMIN o SALES_REP
+        role: user.role,
         fullName: user.fullName
       }
     });
@@ -56,7 +67,6 @@ router.post('/change-password', async (req, res) => {
     const salt = await bcrypt.genSalt(10);
     const passwordHash = await bcrypt.hash(newPassword, salt);
 
-    // Actualizar usando passwordHash
     const updatedUser = await User.findOneAndUpdate(
       { email },
       { passwordHash },
