@@ -1,7 +1,7 @@
 import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
-import { connectDB } from './config/db'; // Asegúrate de ajustar la ruta según tu estructura
+import { connectDB } from './config/database'; // Importación corregida para coincidir con database.ts
 import nogRoutes from './routes/nogRoutes';
 
 dotenv.config();
