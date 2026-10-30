@@ -14,9 +14,6 @@ export default function App() {
   const [successMsg, setSuccessMsg] = useState('');
   const [errorMsg, setErrorMsg] = useState('');
 
-  // ==========================================
-  // NUEVO: ESTADO DINÁMICO PARA EL SUPERADMIN
-  // ==========================================
   const [companies, setCompanies] = useState<any[]>([]);
 
   const handleLogin = async (e: React.FormEvent) => {
@@ -87,11 +84,107 @@ export default function App() {
     }
   };
 
+  useEffect(() => {
+    if (currentView === 'CLIENT') {
+      Aquí tienes el archivo **`App.tsx`** actualizado para incluir el **Módulo Táctico de Cierre** (Matriz de Calificación e Inteligencia de Competidores) directamente en la vista del cliente.
+
+Cuando los vendedores de la empresa ingresen a su panel (`currentView === 'CLIENT'`), verán la oportunidad pre-calificada y, justo debajo, los criterios para ganar y a quién deben vencer.
+
+```tsx
+import React, { useState, useEffect } from 'react';
+import { Target, CheckCircle, XCircle, Search, ArrowLeft, Trophy, FileText, ChevronRight } from 'lucide-react';
+
+export default function App() {
+  const [currentView, setCurrentView] = useState<'LANDING' | 'CHECKOUT' | 'LOGIN' | 'CLIENT' | 'SUPERADMIN'>('LANDING');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  
+  const [nogs, setNogs] = useState<any[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+
+  const [formData, setFormData] = useState({ companyName: '', nit: '', adminName: '', adminEmail: '' });
+  const [checkoutLoading, setCheckoutLoading] = useState(false);
+  const [successMsg, setSuccessMsg] = useState('');
+  const [errorMsg, setErrorMsg] = useState('');
+
+  // ==========================================
+  // ESTADO DINÁMICO PARA EL SUPERADMIN
+  // ==========================================
+  const [companies, setCompanies] = useState<any[]>([]);
+
+  const handleLogin = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsLoading(true);
+
+    try {
+      const response = await fetch('[https://noghunter-pro.onrender.com/api/auth/login](https://noghunter-pro.onrender.com/api/auth/login)', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password })
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        if (data.user.role === 'MASTER') {
+          setCurrentView('SUPERADMIN');
+        } else {
+          setCurrentView('CLIENT');
+        }
+      } else {
+        alert(data.error || 'Credenciales inválidas'); 
+      }
+    } catch (error) {
+      alert('Error de conexión al iniciar sesión');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleCheckoutChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
+
+  const handleCheckoutSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setCheckoutLoading(true);
+    setErrorMsg('');
+    setSuccessMsg('');
+
+    try {
+      const response = await fetch('[https://noghunter-pro.onrender.com/api/payments/webhook](https://noghunter-pro.onrender.com/api/payments/webhook)', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          transactionId: `TXN-${Math.floor(Math.random() * 1000000)}`,
+          companyName: formData.companyName,
+          nit: formData.nit,
+          adminName: formData.adminName,
+          adminEmail: formData.adminEmail,
+          amount: 12500
+        }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        setSuccessMsg('¡Pago exitoso! El entorno de tu empresa ha sido creado. Revisa tu correo electrónico para obtener tus credenciales de acceso.');
+        setFormData({ companyName: '', nit: '', adminName: '', adminEmail: '' });
+      } else {
+        setErrorMsg(data.error || 'Ocurrió un error al procesar la compra.');
+      }
+    } catch (error) {
+      setErrorMsg('Error de conexión con el servidor. Intenta de nuevo.');
+    } finally {
+      setCheckoutLoading(false);
+    }
+  };
+
   // Carga de oportunidades para los clientes
   useEffect(() => {
     if (currentView === 'CLIENT') {
       setIsLoading(true);
-      fetch('https://noghunter-pro.onrender.com/api/nogs')
+      fetch('[https://noghunter-pro.onrender.com/api/nogs](https://noghunter-pro.onrender.com/api/nogs)')
         .then((res) => res.json())
         .then((data) => {
           if (Array.isArray(data) && data.length > 0) {
@@ -109,11 +202,11 @@ export default function App() {
   }, [currentView]);
 
   // ==========================================
-  // NUEVO: CARGA DINÁMICA DE EMPRESAS (SUPERADMIN)
+  // CARGA DINÁMICA DE EMPRESAS (SUPERADMIN)
   // ==========================================
   useEffect(() => {
     if (currentView === 'SUPERADMIN') {
-      fetch('https://noghunter-pro.onrender.com/api/admin/tenants')
+      fetch('[https://noghunter-pro.onrender.com/api/admin/tenants](https://noghunter-pro.onrender.com/api/admin/tenants)')
         .then((res) => res.json())
         .then((data) => {
           if (Array.isArray(data)) {
@@ -126,8 +219,33 @@ export default function App() {
 
   const cargarDatosMuestra = () => {
     setNogs([
-      { id: "9876543", nog: "9876543", title: "Adquisición de Licencias en la Nube y Ciberseguridad", buyer: "Ministerio de Finanzas Públicas", matchScore: 92, summary: ["Se requiere licenciamiento tipo Google Workspace", "Protección perimetral necesaria", "Alta viabilidad para tus servicios"] },
-      { id: "1234567", nog: "1234567", title: "Servicios de Limpieza para Oficinas Centrales", buyer: "Ministerio de Salud", matchScore: 12, summary: ["Servicio de limpieza y conserjería", "No requiere tecnología ni nube", "Descartado automáticamente"] }
+      { 
+        id: "9876543", 
+        nog: "9876543", 
+        title: "Adquisición de Licencias en la Nube y Ciberseguridad", 
+        buyer: "Ministerio de Finanzas Públicas", 
+        matchScore: 92, 
+        summary: ["Se requiere licenciamiento tipo Google Workspace", "Protección perimetral necesaria", "Alta viabilidad para tus servicios"],
+        // Nuevos datos de prueba para el módulo táctico
+        evaluationCriteria: [
+          { factor: "Precio", weight: 40 },
+          { factor: "Tiempo de Entrega", weight: 30 },
+          { factor: "Experiencia Acumulada", weight: 30 }
+        ],
+        strategyIntelligence: {
+          isRenewal: true,
+          previousWinner: "CiberSec S.A.",
+          priceToBeat: 145500.00
+        }
+      },
+      { 
+        id: "1234567", 
+        nog: "1234567", 
+        title: "Servicios de Limpieza para Oficinas Centrales", 
+        buyer: "Ministerio de Salud", 
+        matchScore: 12, 
+        summary: ["Servicio de limpieza y conserjería", "No requiere tecnología ni nube", "Descartado automáticamente"] 
+      }
     ]);
   };
 
@@ -139,7 +257,7 @@ export default function App() {
       <div className="min-h-screen bg-white font-sans text-slate-900">
         <header className="flex justify-between items-center py-4 px-8 border-b border-slate-100">
           <div className="text-2xl font-black tracking-tighter flex items-center gap-2">
-            <Target className="text-blue-600" />
+            <Target className="text-blue-600"/>
             <span className="text-blue-700">NOGHunter</span><span className="text-slate-900">Pro</span>
           </div>
           <button onClick={() => setCurrentView('LOGIN')} className="text-sm font-semibold text-slate-600 hover:text-blue-700 transition-colors">
@@ -162,10 +280,10 @@ export default function App() {
             <div className="mb-8 md:mb-0">
               <h2 className="text-3xl font-bold mb-2">Licencia Corporativa Anual</h2>
               <ul className="space-y-3 mt-6 text-slate-700">
-                <li className="flex items-center gap-2"><CheckCircle className="text-emerald-500" size={20}/> <span className="font-semibold">5 Usuarios</span> incluidos por empresa</li>
-                <li className="flex items-center gap-2"><CheckCircle className="text-emerald-500" size={20}/> Bolsón anual de <span className="font-semibold">50,000 Tokens de IA</span></li>
-                <li className="flex items-center gap-2"><CheckCircle className="text-emerald-500" size={20}/> Integración API directa con tu CRM</li>
-                <li className="flex items-center gap-2"><CheckCircle className="text-emerald-500" size={20}/> Panel Anti-Fricción y resúmenes ejecutivos</li>
+                <li className="flex items-center gap-2"><CheckCircle className="text-emerald-500" size="{20}"/> <span className="font-semibold">5 Usuarios</span> incluidos por empresa</li>
+                <li className="flex items-center gap-2"><CheckCircle className="text-emerald-500" size="{20}"/> Bolsón anual de <span className="font-semibold">50,000 Tokens de IA</span></li>
+                <li className="flex items-center gap-2"><CheckCircle className="text-emerald-500" size="{20}"/> Integración API directa con tu CRM</li>
+                <li className="flex items-center gap-2"><CheckCircle className="text-emerald-500" size="{20}"/> Panel Anti-Fricción y resúmenes ejecutivos</li>
               </ul>
             </div>
             <div className="bg-white p-8 rounded-2xl shadow-md border border-slate-100 text-center min-w-[300px]">
@@ -196,7 +314,7 @@ export default function App() {
     return (
       <div className="min-h-screen bg-slate-50 flex flex-col items-center justify-center p-4 relative">
         <button onClick={() => setCurrentView('LANDING')} className="absolute top-6 left-6 text-sm text-slate-500 hover:text-slate-800 flex items-center gap-1">
-          <ArrowLeft size={16} /> Volver
+          <ArrowLeft size="{16}"/> Volver
         </button>
         
         <div className="max-w-md w-full bg-white rounded-2xl shadow-xl p-8 space-y-6 border border-slate-100">
@@ -249,12 +367,12 @@ export default function App() {
     return (
       <div className="min-h-screen bg-slate-50 flex items-center justify-center p-4 relative">
         <button onClick={() => setCurrentView('LANDING')} className="absolute top-6 left-6 text-sm text-slate-500 hover:text-slate-800 flex items-center gap-1">
-          <ArrowLeft size={16} /> Volver al inicio
+          <ArrowLeft size="{16}"/> Volver al inicio
         </button>
         <div className="max-w-md w-full bg-white rounded-2xl shadow-xl p-8 space-y-6 border border-slate-100">
           <div className="text-center">
             <h1 className="text-3xl font-bold text-slate-900 tracking-tight flex justify-center items-center gap-2">
-              <Target className="text-blue-600" /> NOGHunter Pro
+              <Target className="text-blue-600"/> NOGHunter Pro
             </h1>
             <p className="text-slate-500 mt-2 text-sm">Acceso a plataforma</p>
           </div>
@@ -284,7 +402,7 @@ export default function App() {
       <div className="min-h-screen bg-slate-900 text-slate-100">
         <nav className="bg-slate-800 border-b border-slate-700 px-6 py-4 flex justify-between items-center">
           <h1 className="text-xl font-bold text-white flex items-center gap-2">
-            <Target className="text-blue-400" /> NOGHunter SuperAdmin
+            <Target className="text-blue-400"/> NOGHunter SuperAdmin
           </h1>
           <button onClick={() => setCurrentView('LANDING')} className="text-sm text-slate-400 hover:text-white">Cerrar Sesión</button>
         </nav>
@@ -323,7 +441,7 @@ export default function App() {
       <nav className="bg-white border-b border-slate-200 px-6 py-4 flex justify-between items-center sticky top-0 z-10">
         <div className="flex items-center gap-4">
           <h1 className="text-xl font-bold text-slate-800 flex items-center gap-2">
-            <Target className="text-blue-600" /> NOGHunter Pro
+            <Target className="text-blue-600"/> NOGHunter Pro
           </h1>
           <span className="bg-blue-50 text-blue-700 text-xs font-semibold px-2 py-1 rounded-full border border-blue-200">Suscripción Max</span>
         </div>
@@ -358,6 +476,8 @@ export default function App() {
             ) : (
               nogs.map((op) => (
                 <div key={op.id} className="bg-white rounded-xl shadow-sm border border-slate-200 p-6 flex flex-col md:flex-row gap-6 items-start">
+                  
+                  {/* Columna Izquierda: Información y Resumen */}
                   <div className="flex-1">
                     <div className="flex items-center gap-3 mb-2">
                       <span className="bg-blue-100 text-blue-800 text-xs font-bold px-3 py-1 rounded-full">
@@ -366,10 +486,10 @@ export default function App() {
                       <h3 className="text-xl font-bold text-slate-800">{op.title}</h3>
                     </div>
                     <p className="text-slate-600 font-medium flex items-center gap-2 mb-4">
-                      <Search size={18} /> {op.buyer}
+                      <Search size="{18}"/> {op.buyer}
                     </p>
                     
-                    <div className="bg-slate-50 p-4 rounded-lg border border-slate-100">
+                    <div className="bg-slate-50 p-4 rounded-lg border border-slate-100 mb-4">
                       <h4 className="text-sm font-bold text-slate-700 mb-2 uppercase tracking-wide">Análisis de Gemini AI:</h4>
                       <ul className="space-y-1">
                         {op.summary && op.summary.map((bullet: string, i: number) => (
@@ -379,21 +499,77 @@ export default function App() {
                         ))}
                       </ul>
                     </div>
+
+                    {/* NUEVO: MÓDULO TÁCTICO DE CIERRE (Solo visible si hay datos o score alto) */}
+                    {op.evaluationCriteria && op.matchScore >= 70 && (
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        
+                        {/* Matriz de Calificación */}
+                        <div className="bg-slate-800 p-4 rounded-xl border border-slate-700">
+                          <h4 className="text-sm font-bold text-slate-300 mb-3 flex items-center gap-2">
+                            <FileText className="text-blue-400" size="{16}"/> Criterios de Evaluación
+                          </h4>
+                          <div className="space-y-2">
+                            {op.evaluationCriteria.map((crit: any, index: number) => (
+                              <div key={index} className="flex justify-between items-center text-sm border-b border-slate-700/50 pb-1 last:border-0 last:pb-0">
+                                <span className="text-slate-400">{crit.factor}</span>
+                                <span className="font-bold text-white bg-slate-700 px-2 py-0.5 rounded">{crit.weight}%</span>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+
+                        {/* Inteligencia Histórica */}
+                        <div className="bg-blue-950/40 p-4 rounded-xl border border-blue-900/50 relative overflow-hidden">
+                          {op.strategyIntelligence?.isRenewal && (
+                             <div className="absolute top-0 right-0 bg-orange-500 text-white text-[10px] font-bold px-2 py-1 rounded-bl-lg">
+                               RENOVACIÓN DETECTADA
+                             </div>
+                          )}
+                          <h4 className="text-sm font-bold text-blue-300 mb-3 flex items-center gap-2">
+                            <Trophy size="{16}"/> Estrategia de Cierre
+                          </h4>
+                          <div className="space-y-3">
+                            <div>
+                              <div className="text-[11px] text-slate-400 uppercase tracking-wider mb-0.5">Precio Máx a Vencer</div>
+                              <div className="text-xl font-black text-emerald-400">
+                                Q {op.strategyIntelligence?.priceToBeat?.toLocaleString('es-GT', {minimumFractionDigits: 2})}
+                              </div>
+                            </div>
+                            <div>
+                              <div className="text-[11px] text-slate-400 uppercase tracking-wider mb-0.5">Competidor a Vencer</div>
+                              <div className="text-sm font-bold text-slate-200 truncate">
+                                {op.strategyIntelligence?.previousWinner || 'Sin registro previo'}
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+
+                      </div>
+                    )}
                   </div>
 
-                  <div className="w-full md:w-48 bg-slate-50 rounded-xl p-4 flex flex-col items-center justify-center border border-slate-100 text-center min-h-[160px]">
-                    <span className="text-sm font-bold text-slate-500 mb-1">Match Score</span>
-                    <div className={`text-4xl font-black mb-2 ${op.matchScore >= 70 ? 'text-green-600' : 'text-red-500'}`}>
-                      {op.matchScore}%
+                  {/* Columna Derecha: Match Score */}
+                  <div className="w-full md:w-48 flex flex-col gap-3">
+                    <div className="bg-slate-50 rounded-xl p-4 flex flex-col items-center justify-center border border-slate-100 text-center flex-1">
+                      <span className="text-sm font-bold text-slate-500 mb-1">Match Score</span>
+                      <div className={`text-4xl font-black mb-2 ${op.matchScore >= 70 ? 'text-green-600' : 'text-red-500'}`}>
+                        {op.matchScore}%
+                      </div>
+                      {op.matchScore >= 70 ? (
+                        <span className="flex items-center justify-center gap-1 text-xs font-bold text-green-700 bg-green-100 px-2 py-1 rounded w-full">
+                          <CheckCircle size="{14}"/> Alta Viabilidad
+                        </span>
+                      ) : (
+                        <span className="flex items-center justify-center gap-1 text-xs font-bold text-red-700 bg-red-100 px-2 py-1 rounded w-full">
+                          <XCircle size="{14}"/> Descartado
+                        </span>
+                      )}
                     </div>
-                    {op.matchScore >= 70 ? (
-                      <span className="flex items-center justify-center gap-1 text-xs font-bold text-green-700 bg-green-100 px-2 py-1 rounded w-full">
-                        <CheckCircle size={14} /> Alta Viabilidad
-                      </span>
-                    ) : (
-                      <span className="flex items-center justify-center gap-1 text-xs font-bold text-red-700 bg-red-100 px-2 py-1 rounded w-full">
-                        <XCircle size={14} /> Descartado
-                      </span>
+                    {op.matchScore >= 70 && (
+                      <button className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-xl flex items-center justify-center gap-2 transition-colors">
+                        Enviar a CRM <ChevronRight size="{16}"/>
+                      </button>
                     )}
                   </div>
                 </div>
