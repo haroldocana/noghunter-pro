@@ -1,7 +1,6 @@
 import bcrypt from 'bcryptjs';
 import User from './models/User';
 
-// Función para asegurar que el SuperAdmin exista en MongoDB
 const seedSuperAdmin = async () => {
   try {
     const adminEmail = 'harold.ocana@comptech.lat';
@@ -10,16 +9,17 @@ const seedSuperAdmin = async () => {
     const hashedPassword = await bcrypt.hash('Admin123*', 10);
 
     if (existingAdmin) {
-      existingAdmin.password = hashedPassword;
+      existingAdmin.passwordHash = hashedPassword;
       existingAdmin.role = 'MASTER';
       await existingAdmin.save();
-      console.log('✔ SuperAdmin verificado y actualizado en la BD.');
+      console.log('✔ SuperAdmin verificado y actualizado con éxito.');
     } else {
       await User.create({
         email: adminEmail,
-        password: hashedPassword,
+        passwordHash: hashedPassword,
         role: 'MASTER',
-        name: 'Harold Ocaña'
+        fullName: 'Harold Ocaña',
+        isActive: true
       });
       console.log('✔ SuperAdmin creado exitosamente en la BD.');
     }
@@ -28,5 +28,5 @@ const seedSuperAdmin = async () => {
   }
 };
 
-// Ejecútalo al iniciar la conexión (puedes dejarlo aquí para que siempre valide el acceso)
+// Ejecutar tras iniciar conexión
 setTimeout(seedSuperAdmin, 3000);
