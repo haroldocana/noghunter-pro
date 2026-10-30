@@ -4,5 +4,12 @@
     "rootDir": "./src",
     "esModuleInterop": true,
     "moduleResolution": "node"
-  }
+  },
+  "include": [
+    "src/**/*"
+  ],
+  "exclude": [
+    "frontend",
+    "node_modules"
+  ]
 }
