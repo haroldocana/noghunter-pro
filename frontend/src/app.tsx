@@ -1,4 +1,5 @@
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
+import { Target, CheckCircle, XCircle, Search, ArrowLeft } from 'lucide-react';
 
 export default function App() {
   // Manejador de vistas: LANDING (Pública), LOGIN, CLIENT (Dashboard), SUPERADMIN
@@ -29,15 +30,44 @@ export default function App() {
   useEffect(() => {
     if (currentView === 'CLIENT') {
       setIsLoading(true);
+      // Simulación de fetch al backend - Si falla o está vacío, cargamos datos de muestra para ver la UI
       fetch('/api/nogs')
         .then((res) => res.json())
         .then((data) => {
-          setNogs(Array.isArray(data) ? data : []);
+          if (Array.isArray(data) && data.length > 0) {
+            setNogs(data);
+          } else {
+            cargarDatosMuestra();
+          }
           setIsLoading(false);
         })
-        .catch(() => setIsLoading(false));
+        .catch(() => {
+          cargarDatosMuestra();
+          setIsLoading(false);
+        });
     }
   }, [currentView]);
+
+  const cargarDatosMuestra = () => {
+    setNogs([
+      {
+        id: "9876543",
+        nog: "9876543",
+        title: "Adquisición de Licencias en la Nube y Ciberseguridad",
+        buyer: "Ministerio de Finanzas Públicas",
+        matchScore: 92,
+        summary: ["Se requiere licenciamiento tipo Google Workspace", "Protección perimetral necesaria", "Alta viabilidad para tus servicios"]
+      },
+      {
+        id: "1234567",
+        nog: "1234567",
+        title: "Servicios de Limpieza para Oficinas Centrales",
+        buyer: "Ministerio de Salud",
+        matchScore: 12,
+        summary: ["Servicio de limpieza y conserjería", "No requiere tecnología ni nube", "Descartado automáticamente"]
+      }
+    ]);
+  };
 
   // ==========================================
   // VISTA 1: LANDING PAGE COMERCIAL (PÚBLICA)
@@ -45,9 +75,11 @@ export default function App() {
   if (currentView === 'LANDING') {
     return (
       <div className="min-h-screen bg-white font-sans text-slate-900">
-        {/* Navbar Público */}
         <header className="flex justify-between items-center py-4 px-8 border-b border-slate-100">
-          <div className="text-2xl font-black tracking-tighter text-blue-700">NOGHunter<span className="text-slate-900">Pro</span></div>
+          <div className="text-2xl font-black tracking-tighter flex items-center gap-2">
+            <Target className="text-blue-600" />
+            <span className="text-blue-700">NOGHunter</span><span className="text-slate-900">Pro</span>
+          </div>
           <button 
             onClick={() => setCurrentView('LOGIN')}
             className="text-sm font-semibold text-slate-600 hover:text-blue-700 transition-colors"
@@ -56,9 +88,8 @@ export default function App() {
           </button>
         </header>
 
-        {/* Hero Section */}
         <section className="max-w-5xl mx-auto text-center py-20 px-4">
-          <h1 className="text-5xl font-extrabold tracking-tight mb-6">
+          <h1 className="text-5xl font-extrabold tracking-tight mb-6 leading-tight">
             Guatecompras, sin reglas manuales.<br/>
             <span className="text-blue-600">Impulsado por Inteligencia Artificial.</span>
           </h1>
@@ -67,16 +98,15 @@ export default function App() {
           </p>
         </section>
 
-        {/* Pricing Section */}
         <section className="max-w-4xl mx-auto py-12 px-4 mb-20">
           <div className="bg-slate-50 rounded-3xl p-8 md:p-12 flex flex-col md:flex-row items-center justify-between border border-slate-200 shadow-xl">
             <div className="mb-8 md:mb-0">
               <h2 className="text-3xl font-bold mb-2">Licencia Corporativa Anual</h2>
               <ul className="space-y-3 mt-6 text-slate-700">
-                <li className="flex items-center gap-2">✅ <span className="font-semibold">5 Usuarios</span> incluidos por empresa</li>
-                <li className="flex items-center gap-2">✅ Bolsón anual de <span className="font-semibold">50,000 Tokens de IA</span></li>
-                <li className="flex items-center gap-2">✅ Integración API directa con tu CRM</li>
-                <li className="flex items-center gap-2">✅ Panel Anti-Fricción y resúmenes ejecutivos</li>
+                <li className="flex items-center gap-2"><CheckCircle className="text-emerald-500" size={20}/> <span className="font-semibold">5 Usuarios</span> incluidos por empresa</li>
+                <li className="flex items-center gap-2"><CheckCircle className="text-emerald-500" size={20}/> Bolsón anual de <span className="font-semibold">50,000 Tokens de IA</span></li>
+                <li className="flex items-center gap-2"><CheckCircle className="text-emerald-500" size={20}/> Integración API directa con tu CRM</li>
+                <li className="flex items-center gap-2"><CheckCircle className="text-emerald-500" size={20}/> Panel Anti-Fricción y resúmenes ejecutivos</li>
               </ul>
             </div>
             <div className="bg-white p-8 rounded-2xl shadow-md border border-slate-100 text-center min-w-[300px]">
@@ -84,7 +114,6 @@ export default function App() {
               <div className="text-4xl font-black text-slate-900 mb-1">Q12,500</div>
               <div className="text-sm text-slate-400 mb-6">Facturación anual</div>
               
-              {/* Botón de Pago (Integración futura con Pagalo/QPayPro) */}
               <button 
                 onClick={() => alert('Aquí se abrirá el popup de Pagalo o QPayPro para procesar el cobro en Bi o G&T')}
                 className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 rounded-xl shadow-lg transition-transform hover:scale-105"
@@ -107,12 +136,14 @@ export default function App() {
   if (currentView === 'LOGIN') {
     return (
       <div className="min-h-screen bg-slate-50 flex items-center justify-center p-4 relative">
-        <button onClick={() => setCurrentView('LANDING')} className="absolute top-6 left-6 text-sm text-slate-500 hover:text-slate-800">
-          ← Volver al inicio
+        <button onClick={() => setCurrentView('LANDING')} className="absolute top-6 left-6 text-sm text-slate-500 hover:text-slate-800 flex items-center gap-1">
+          <ArrowLeft size={16} /> Volver al inicio
         </button>
         <div className="max-w-md w-full bg-white rounded-2xl shadow-xl p-8 space-y-6 border border-slate-100">
           <div className="text-center">
-            <h1 className="text-3xl font-bold text-slate-900 tracking-tight">NOGHunter Pro</h1>
+            <h1 className="text-3xl font-bold text-slate-900 tracking-tight flex justify-center items-center gap-2">
+              <Target className="text-blue-600" /> NOGHunter Pro
+            </h1>
             <p className="text-slate-500 mt-2 text-sm">Acceso a plataforma</p>
           </div>
           <form onSubmit={handleLogin} className="space-y-4">
@@ -140,7 +171,9 @@ export default function App() {
     return (
       <div className="min-h-screen bg-slate-900 text-slate-100">
         <nav className="bg-slate-800 border-b border-slate-700 px-6 py-4 flex justify-between items-center">
-          <h1 className="text-xl font-bold text-white">NOGHunter SuperAdmin</h1>
+          <h1 className="text-xl font-bold text-white flex items-center gap-2">
+            <Target className="text-blue-400" /> NOGHunter SuperAdmin
+          </h1>
           <button onClick={() => setCurrentView('LANDING')} className="text-sm text-slate-400 hover:text-white">Cerrar Sesión</button>
         </nav>
         <main className="max-w-6xl mx-auto py-8 px-4">
@@ -174,10 +207,12 @@ export default function App() {
   // VISTA 4: PANEL CLIENTE (ANTI-DASHBOARD)
   // ==========================================
   return (
-    <div className="min-h-screen bg-slate-50">
+    <div className="min-h-screen bg-slate-50 font-sans">
       <nav className="bg-white border-b border-slate-200 px-6 py-4 flex justify-between items-center sticky top-0 z-10">
         <div className="flex items-center gap-4">
-          <h1 className="text-xl font-bold text-slate-800">NOGHunter Pro</h1>
+          <h1 className="text-xl font-bold text-slate-800 flex items-center gap-2">
+            <Target className="text-blue-600" /> NOGHunter Pro
+          </h1>
           <span className="bg-blue-50 text-blue-700 text-xs font-semibold px-2 py-1 rounded-full border border-blue-200">Suscripción Max</span>
         </div>
         <div className="flex items-center gap-6">
@@ -205,14 +240,50 @@ export default function App() {
         ) : (
           <div className="space-y-6">
             {nogs.length === 0 ? (
-              <div className="bg-white rounded-xl p-8 text-center border border-slate-200">
+              <div className="bg-white rounded-xl p-8 text-center border border-slate-200 shadow-sm">
                 <p className="text-slate-500">No hay licitaciones nuevas en este momento. El radar sigue monitoreando.</p>
               </div>
             ) : (
-              nogs.map((nog) => (
-                <div key={nog.id} className="bg-white border border-slate-200 rounded-xl p-6 shadow-sm">
-                  <h3 className="text-lg font-bold text-slate-900">{nog.title}</h3>
-                  <p className="text-sm text-slate-600 mb-4">{nog.buyer}</p>
+              nogs.map((op) => (
+                <div key={op.id} className="bg-white rounded-xl shadow-sm border border-slate-200 p-6 flex flex-col md:flex-row gap-6 items-start">
+                  <div className="flex-1">
+                    <div className="flex items-center gap-3 mb-2">
+                      <span className="bg-blue-100 text-blue-800 text-xs font-bold px-3 py-1 rounded-full">
+                        NOG: {op.nog}
+                      </span>
+                      <h3 className="text-xl font-bold text-slate-800">{op.title}</h3>
+                    </div>
+                    <p className="text-slate-600 font-medium flex items-center gap-2 mb-4">
+                      <Search size={18} /> {op.buyer}
+                    </p>
+                    
+                    <div className="bg-slate-50 p-4 rounded-lg border border-slate-100">
+                      <h4 className="text-sm font-bold text-slate-700 mb-2 uppercase tracking-wide">Análisis de Gemini AI:</h4>
+                      <ul className="space-y-1">
+                        {op.summary && op.summary.map((bullet: string, i: number) => (
+                          <li key={i} className="text-sm text-slate-600 flex items-start gap-2">
+                            <span className="text-blue-500 mt-0.5">•</span> {bullet}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  </div>
+
+                  <div className="w-full md:w-48 bg-slate-50 rounded-xl p-4 flex flex-col items-center justify-center border border-slate-100 text-center min-h-[160px]">
+                    <span className="text-sm font-bold text-slate-500 mb-1">Match Score</span>
+                    <div className={`text-4xl font-black mb-2 ${op.matchScore >= 70 ? 'text-green-600' : 'text-red-500'}`}>
+                      {op.matchScore}%
+                    </div>
+                    {op.matchScore >= 70 ? (
+                      <span className="flex items-center justify-center gap-1 text-xs font-bold text-green-700 bg-green-100 px-2 py-1 rounded w-full">
+                        <CheckCircle size={14} /> Alta Viabilidad
+                      </span>
+                    ) : (
+                      <span className="flex items-center justify-center gap-1 text-xs font-bold text-red-700 bg-red-100 px-2 py-1 rounded w-full">
+                        <XCircle size={14} /> Descartado
+                      </span>
+                    )}
+                  </div>
                 </div>
               ))
             )}
