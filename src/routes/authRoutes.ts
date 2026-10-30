@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import bcrypt from 'bcryptjs';
-import User from '../models/User'; // Asegúrate de que la ruta a tu modelo de Usuario sea correcta
+import User from '../models/User';
 
 const router = Router();
 
@@ -11,25 +11,29 @@ router.post('/login', async (req, res) => {
   try {
     const { email, password } = req.body;
 
-    // Buscar al usuario en la base de datos
+    // Buscar al usuario por correo
     const user = await User.findOne({ email });
     if (!user) {
       return res.status(401).json({ error: 'Credenciales inválidas (usuario no encontrado)' });
     }
 
-    // Verificar contraseña con bcryptjs
-    const isMatch = await bcrypt.compare(password, user.password);
+    // Validar contraseña utilizando passwordHash
+    const isMatch = await bcrypt.compare(password, user.passwordHash);
     if (!isMatch) {
       return res.status(401).json({ error: 'Credenciales inválidas (contraseña incorrecta)' });
     }
 
-    // Responder con éxito y el rol del usuario (MASTER o CLIENT)
+    // Actualizar la fecha del último login
+    user.lastLogin = new Date();
+    await user.save();
+
+    // Responder con éxito y el rol correspondiente
     res.json({
       success: true,
       user: {
         email: user.email,
-        role: user.role || 'CLIENT',
-        name: user.name || 'Usuario'
+        role: user.role, // MASTER, ADMIN o SALES_REP
+        fullName: user.fullName
       }
     });
   } catch (error) {
@@ -49,14 +53,13 @@ router.post('/change-password', async (req, res) => {
       return res.status(400).json({ error: 'La nueva contraseña debe tener al menos 6 caracteres' });
     }
 
-    // Hashear la nueva contraseña de forma segura
     const salt = await bcrypt.genSalt(10);
-    const hashedPassword = await bcrypt.hash(newPassword, salt);
+    const passwordHash = await bcrypt.hash(newPassword, salt);
 
-    // Actualizar en MongoDB
+    // Actualizar usando passwordHash
     const updatedUser = await User.findOneAndUpdate(
       { email },
-      { password: hashedPassword },
+      { passwordHash },
       { new: true }
     );
 
