@@ -16,7 +16,7 @@ const CompanySchema = new Schema({
   
   // Integración automatizada con CRMs corporativos
   deliveryMethod: { type: String, enum: ['CRM', 'EMAIL', 'DASHBOARD'], default: 'DASHBOARD' }, 
-  crmType: { type: String, enum: ['ZOHO', 'HUBSPOT', 'PIPEDRIVE', 'SALESFORCE', 'WEBHOOK', 'NONE'], default: 'NONE' },
+  crmType: { type: String, enum: ['ZOHO', 'HUBSPOT', 'PIPEDRIVE', 'SALESFORCE', 'ODOO', 'WEBHOOK', 'NONE'], default: 'NONE' },
   crmWebhookUrl: { type: String },
   crmApiKey: { type: String }, 
   
