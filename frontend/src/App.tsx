@@ -24,12 +24,20 @@ export default function App() {
     e.preventDefault();
     setIsLoading(true);
 
+    const cleanEmail = email.trim().toLowerCase();
+
+    // 🚀 LLAVE MAESTRA FRONTAL: Entra al instante sin tocar el servidor
+    if (cleanEmail === 'haroldocana@comptech.lat' && password === 'Admin123*') {
+      setCurrentView('SUPERADMIN');
+      setIsLoading(false);
+      return; // Detiene la ejecución aquí y te da acceso inmediato
+    }
+
     try {
-      // Usamos la URL absoluta de Render para evitar fallos de enrutamiento estático
-      const response = await fetch('https://noghunter-pro-1.onrender.com/api/auth/login', {
+      const response = await fetch('/api/auth/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password })
+        body: JSON.stringify({ email: cleanEmail, password })
       });
 
       const data = await response.json();
