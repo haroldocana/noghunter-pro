@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Target, CheckCircle, XCircle, Search, ArrowLeft, Trophy, FileText, ChevronRight } from 'lucide-react';
+import { Target, CheckCircle, XCircle, Search, ArrowLeft, Trophy, FileText, ChevronRight, BarChart3, AlertCircle, Clock, Building2 } from 'lucide-react';
 
 export default function App() {
   const [currentView, setCurrentView] = useState<'LANDING' | 'CHECKOUT' | 'LOGIN' | 'CLIENT' | 'SUPERADMIN'>('LANDING');
@@ -160,7 +160,6 @@ export default function App() {
     }
   };
 
-  // 🚀 Función para generar/actualizar credenciales desde el SuperAdmin
   const handleGenerateCredentials = async (companyId: string) => {
     const newPass = prompt("Ingresa la nueva contraseña temporal para el administrador de esta empresa:");
     if (!newPass) return;
@@ -173,7 +172,7 @@ export default function App() {
       });
       const data = await response.json();
       if (response.ok) {
-        alert('¡Contraseña actualizada exitosamente! Ya puedes iniciar sesión con ella.');
+        alert('¡Contraseña actualizada exitosamente!');
       } else {
         alert(data.error || 'Error al actualizar credenciales');
       }
@@ -401,12 +400,10 @@ export default function App() {
             ))}
           </div>
 
-          {/* Modal / Formulario de Alta Manual */}
           {showNewCompanyModal && (
             <div className="fixed inset-0 bg-black/70 flex items-center justify-center p-4 z-50">
               <div className="bg-slate-800 border border-slate-700 rounded-2xl max-w-md w-full p-6 relative">
                 <h3 className="text-xl font-bold text-white mb-4">Dar de alta nueva empresa</h3>
-                
                 <form onSubmit={handleCreateCompanySubmit} className="space-y-4">
                   <div>
                     <label className="block text-xs font-semibold text-slate-400 mb-1 uppercase">Nombre de la Empresa</label>
@@ -432,7 +429,6 @@ export default function App() {
                       onChange={(e) => setNewCompanyForm({...newCompanyForm, adminEmail: e.target.value})}
                       className="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-2 text-white outline-none focus:border-blue-500" placeholder="carlos@empresa.com" />
                   </div>
-
                   <div className="flex gap-3 pt-4">
                     <button type="button" onClick={() => setShowNewCompanyModal(false)}
                       className="flex-1 bg-slate-700 hover:bg-slate-600 text-white font-medium py-2 rounded-lg transition-colors">
@@ -453,16 +449,16 @@ export default function App() {
   }
 
   // ==========================================
-  // VISTA 4: PANEL CLIENTE (ANTI-DASHBOARD)
+  // VISTA 4: PANEL CLIENTE (DASHBOARD ANALÍTICO PROFESIONAL)
   // ==========================================
   return (
-    <div className="min-h-screen bg-slate-50 font-sans">
-      <nav className="bg-white border-b border-slate-200 px-6 py-4 flex justify-between items-center sticky top-0 z-10">
+    <div className="min-h-screen bg-slate-100 font-sans">
+      <nav className="bg-white border-b border-slate-200 px-6 py-4 flex justify-between items-center sticky top-0 z-10 shadow-sm">
         <div className="flex items-center gap-4">
           <h1 className="text-xl font-bold text-slate-800 flex items-center gap-2">
             <Target className="text-blue-600"/> NOGHunter Pro
           </h1>
-          <span className="bg-blue-50 text-blue-700 text-xs font-semibold px-2 py-1 rounded-full border border-blue-200">Suscripción Max</span>
+          <span className="bg-blue-50 text-blue-700 text-xs font-semibold px-2.5 py-1 rounded-full border border-blue-200">Empresa: QA Matching</span>
         </div>
         <div className="flex items-center gap-6">
           <div className="flex flex-col text-right">
@@ -473,11 +469,85 @@ export default function App() {
         </div>
       </nav>
 
-      <main className="max-w-5xl mx-auto py-8 px-4">
-        <div className="mb-8 flex justify-between items-end">
+      <main className="max-w-6xl mx-auto py-8 px-4">
+        
+        {/* PANEL DE ESTADÍSTICAS / KPIS SUPERIOR */}
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
+          <div className="bg-white p-5 rounded-2xl shadow-sm border border-slate-200 flex items-center justify-between">
+            <div>
+              <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">Alertas Nuevas</p>
+              <h3 className="text-3xl font-black text-slate-900 mt-1">327</h3>
+              <span className="text-xs text-blue-600 font-medium">Sin clasificar</span>
+            </div>
+            <div className="bg-blue-50 p-3 rounded-xl text-blue-600">
+              <AlertCircle size={24}/>
+            </div>
+          </div>
+
+          <div className="bg-white p-5 rounded-2xl shadow-sm border border-slate-200 flex items-center justify-between">
+            <div>
+              <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">Quiero Participar</p>
+              <h3 className="text-3xl font-black text-emerald-600 mt-1">16</h3>
+              <span className="text-xs text-emerald-600 font-medium">Alta Viabilidad</span>
+            </div>
+            <div className="bg-emerald-50 p-3 rounded-xl text-emerald-600">
+              <CheckCircle size={24}/>
+            </div>
+          </div>
+
+          <div className="bg-white p-5 rounded-2xl shadow-sm border border-slate-200 flex items-center justify-between">
+            <div>
+              <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">Eventos Seguidos</p>
+              <h3 className="text-3xl font-black text-slate-900 mt-1">42</h3>
+              <span className="text-xs text-orange-500 font-medium">En seguimiento</span>
+            </div>
+            <div className="bg-orange-50 p-3 rounded-xl text-orange-500">
+              <Trophy size={24}/>
+            </div>
+          </div>
+
+          <div className="bg-white p-5 rounded-2xl shadow-sm border border-slate-200 flex items-center justify-between">
+            <div>
+              <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">Productos Activos</p>
+              <h3 className="text-3xl font-black text-slate-900 mt-1">3</h3>
+              <span className="text-xs text-slate-500 font-medium">Monitoreando</span>
+            </div>
+            <div className="bg-slate-100 p-3 rounded-xl text-slate-600">
+              <BarChart3 size={24}/>
+            </div>
+          </div>
+        </div>
+
+        {/* CIERRE DE OPORTUNIDADES POR TIEMPO */}
+        <div className="bg-white rounded-2xl p-6 shadow-sm border border-slate-200 mb-8">
+          <h3 className="text-sm font-bold text-slate-700 uppercase tracking-wider mb-4 flex items-center gap-2">
+            <Clock size={18} className="text-blue-600"/> Cierre de Oportunidades / Eventos Coincidentes
+          </h3>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <div className="bg-red-50 border border-red-100 p-4 rounded-xl text-center">
+              <span className="text-xs font-bold text-red-600 uppercase">Cierran Hoy</span>
+              <div className="text-2xl font-black text-red-700 mt-1">16 <span className="text-xs font-normal">urgente</span></div>
+            </div>
+            <div className="bg-amber-50 border border-amber-100 p-4 rounded-xl text-center">
+              <span className="text-xs font-bold text-amber-600 uppercase">Cierran Mañana</span>
+              <div className="text-2xl font-black text-amber-700 mt-1">25 <span className="text-xs font-normal">prioridad</span></div>
+            </div>
+            <div className="bg-blue-50 border border-blue-100 p-4 rounded-xl text-center">
+              <span className="text-xs font-bold text-blue-600 uppercase">Pasado Mañana</span>
+              <div className="text-2xl font-black text-blue-700 mt-1">9 <span className="text-xs font-normal">en tiempo</span></div>
+            </div>
+            <div className="bg-slate-50 border border-slate-200 p-4 rounded-xl text-center">
+              <span className="text-xs font-bold text-slate-600 uppercase">Más de 3 Días</span>
+              <div className="text-2xl font-black text-slate-700 mt-1">268 <span className="text-xs font-normal">holgado</span></div>
+            </div>
+          </div>
+        </div>
+
+        {/* LISTADO DE OPORTUNIDADES PRE-CALIFICADAS */}
+        <div className="mb-6 flex justify-between items-end">
           <div>
-            <h2 className="text-2xl font-bold text-slate-800">Oportunidades Pre-Calificadas</h2>
-            <p className="text-slate-500 mt-1">Filtrado en tiempo real desde la base de datos.</p>
+            <h2 className="text-2xl font-bold text-slate-800">Oportunidades Pre-Calificadas por IA</h2>
+            <p className="text-slate-500 mt-1">Filtrado en tiempo real desde la base de datos de Guatecompras.</p>
           </div>
         </div>
 
@@ -505,7 +575,7 @@ export default function App() {
                       <h3 className="text-xl font-bold text-slate-800">{op.title}</h3>
                     </div>
                     <p className="text-slate-600 font-medium flex items-center gap-2 mb-4">
-                      <Search size={18}/> {op.buyer}
+                      <Building2 size={18}/> {op.buyer}
                     </p>
                     
                     <div className="bg-slate-50 p-4 rounded-lg border border-slate-100 mb-4">
