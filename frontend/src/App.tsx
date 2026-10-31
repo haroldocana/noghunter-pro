@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Target, CheckCircle, XCircle, Search, ArrowLeft, Trophy, FileText, ChevronRight, BarChart3, AlertCircle, Clock, Building2, Filter, Download, Cpu, ShieldCheck, Layers, LogOut, PieChart, TrendingUp, Sliders, Zap, AlertTriangle } from 'lucide-react';
+import { Target, CheckCircle, XCircle, Search, ArrowLeft, Trophy, FileText, ChevronRight, BarChart3, AlertCircle, Clock, Building2, Filter, Download, Cpu, ShieldCheck, Layers, LogOut, PieChart, TrendingUp, Sliders, Zap, AlertTriangle, Eye, RefreshCw } from 'lucide-react';
 
 export default function App() {
   const [currentView, setCurrentView] = useState<'LANDING' | 'CHECKOUT' | 'LOGIN' | 'CLIENT' | 'SUPERADMIN' | 'DETAIL'>('LANDING');
@@ -10,15 +10,13 @@ export default function App() {
   const [isLoading, setIsLoading] = useState(false);
   const [selectedNog, setSelectedNog] = useState<any>(null);
 
-  // Pestañas de la barra lateral profesional
-  const [activeTab, setActiveTab] = useState<'DASHBOARD' | 'ALERTAS' | 'PRESUPUESTOS' | 'LABORATORIO'>('DASHBOARD');
+  // Pestañas profesionales incluyendo el nuevo módulo de Recuperación de Proyectos
+  const [activeTab, setActiveTab] = useState<'DASHBOARD' | 'ALERTAS' | 'PRESUPUESTOS' | 'RECUPERACION' | 'LABORATORIO'>('DASHBOARD');
   const [filterType, setFilterType] = useState('TODOS');
-  
-  // 🚀 NUEVO: Selector de categoría libre o dinámica elegida por el usuario
   const [selectedCategory, setSelectedCategory] = useState('TODAS');
   const [searchTerm, setSearchTerm] = useState('');
 
-  // Estados para el Simulador IA de Oferta
+  // Simulador IA
   const [ourCost, setOurCost] = useState('');
   const [simulationResult, setSimulationResult] = useState<any>(null);
 
@@ -27,7 +25,6 @@ export default function App() {
   const [successMsg, setSuccessMsg] = useState('');
   const [errorMsg, setErrorMsg] = useState('');
 
-  // SuperAdmin
   const [companies, setCompanies] = useState<any[]>([]);
   const [showNewCompanyModal, setShowNewCompanyModal] = useState(false);
   const [newCompanyForm, setNewCompanyForm] = useState({ companyName: '', nit: '', adminName: '', adminEmail: '' });
@@ -108,11 +105,11 @@ export default function App() {
         .then((res) => res.json())
         .then((data) => {
           if (Array.isArray(data) && data.length > 0) setNogs(data);
-          else cargarDatosMulticategoriaMuestra();
+          else cargarDatosCompletosMuestra();
           setIsLoading(false);
         })
         .catch(() => {
-          cargarDatosMulticategoriaMuestra();
+          cargarDatosCompletosMuestra();
           setIsLoading(false);
         });
     }
@@ -168,8 +165,7 @@ export default function App() {
     }
   };
 
-  // 🚀 DATOS DE MUESTRA AMPLIADOS A VARIAS CATEGORÍAS
-  const cargarDatosMulticategoriaMuestra = () => {
+  const cargarDatosCompletosMuestra = () => {
     setNogs([
       { 
         id: "9876543", 
@@ -181,6 +177,9 @@ export default function App() {
         category: "Tecnología y Cloud",
         estimatedBudget: 150000.00,
         matchScore: 92, 
+        closingTime: "Cierra Hoy",
+        requiresOnSiteVisit: true, // 👈 NUEVO: Vistas presenciales obligatorias
+        onSiteVisitDetails: { date: "3 de Noviembre, 2024 - 10:00 AM", location: "Oficinas Centrales Minfin, Zona 1" },
         institutionRisk: { avgPaymentDays: "35 días", revocationRate: "Bajo (1.2%)", transparencyScore: "96 / 100" },
         summary: ["Licenciamiento Google Workspace", "Protección perimetral avanzada", "Alta viabilidad para tus servicios"],
         evaluationCriteria: [{ factor: "Precio", weight: 40 }, { factor: "Experiencia", weight: 60 }],
@@ -192,38 +191,22 @@ export default function App() {
       { 
         id: "4567891", 
         nog: "4567891", 
-        title: "Suministro de Medicamentos e Insumos Hospitalarios", 
+        title: "Compra Directa de Suministros de Red y Cables UTP", 
         buyer: "MINISTERIO DE SALUD PÚBLICA", 
-        procurementType: "COTIZACIÓN",
-        extractedProduct: "Antibióticos y Material Quirúrgico",
-        category: "Salud e Insumos Médicos",
-        estimatedBudget: 450000.00,
-        matchScore: 88, 
+        procurementType: "COMPRA DIRECTA", // 👈 BAJA CUANTÍA / 24-48 HORAS
+        extractedProduct: "Cableado y Conectividad",
+        category: "Tecnología y Cloud",
+        estimatedBudget: 45000.00,
+        matchScore: 95, 
+        closingTime: "Cierra en 24 Horas",
+        requiresOnSiteVisit: false,
         institutionRisk: { avgPaymentDays: "60 días", revocationRate: "Medio (3.5%)", transparencyScore: "88 / 100" },
-        summary: ["Suministro lote hospitalario", "Registro sanitario vigente requerido", "Entrega semestral"],
-        evaluationCriteria: [{ factor: "Costo", weight: 70 }, { factor: "Tiempo", weight: 30 }],
-        competitorsAnalysis: [{ name: "PharmaCorp", probability: "60%", strength: "Stock inmediato" }],
-        strategyIntelligence: { isRenewal: false, previousWinner: "PharmaCorp", priceToBeat: 420000.00 },
-        riskClauses: ["Garantía de cumplimiento del 20%"],
-        documents: [{ name: "Bases_Salud_4567891.pdf", size: "3.1 MB", type: "Bases Oficiales" }]
-      },
-      { 
-        id: "1122334", 
-        nog: "1122334", 
-        title: "Construcción de Muro Perimetral y Remozamiento Escolar", 
-        buyer: "MINISTERIO DE EDUCACIÓN", 
-        procurementType: "LICITACIÓN PÚBLICA",
-        extractedProduct: "Obra Gris y Albañilería",
-        category: "Construcción y Obra Grís",
-        estimatedBudget: 850000.00,
-        matchScore: 45, 
-        institutionRisk: { avgPaymentDays: "45 días", revocationRate: "Bajo (2.0%)", transparencyScore: "90 / 100" },
-        summary: ["Remozamiento de centro educativo", "Mano de obra y materiales incluidos"],
-        evaluationCriteria: [{ factor: "Precio", weight: 50 }, { factor: "Plazo", weight: 50 }],
-        competitorsAnalysis: [{ name: "Constructora Izabal", probability: "80%", strength: "Experiencia local" }],
-        strategyIntelligence: { isRenewal: false, previousWinner: "Constructora Izabal", priceToBeat: 800000.00 },
-        riskClauses: ["Fianza de anticipo obligatoria"],
-        documents: [{ name: "Planos_Mineduc.pdf", size: "12.5 MB", type: "Planos y Bases" }]
+        summary: ["Baja cuantía con cierre rápido", "Entrega inmediata en almacén"],
+        evaluationCriteria: [{ factor: "Precio", weight: 100 }],
+        competitorsAnalysis: [{ name: "TecnoExpress", probability: "50%", strength: "Rapidez" }],
+        strategyIntelligence: { isRenewal: false, previousWinner: "TecnoExpress", priceToBeat: 44000.00 },
+        riskClauses: [],
+        documents: [{ name: "Orden_Compra_Directa.pdf", size: "1.1 MB", type: "Documento Base" }]
       }
     ]);
   };
@@ -244,7 +227,6 @@ export default function App() {
     });
   };
 
-  // Filtrado robusto por categoría seleccionada, tipo y búsqueda abierta
   const filteredNogs = nogs.filter(op => {
     const matchesCategory = selectedCategory === 'TODAS' || op.category === selectedCategory;
     const matchesType = filterType === 'TODOS' || op.procurementType === filterType;
@@ -268,9 +250,9 @@ export default function App() {
         </header>
         <section className="max-w-5xl mx-auto text-center py-20 px-4">
           <h1 className="text-5xl font-extrabold tracking-tight mb-6 leading-tight">
-            Guatecompras en cualquier categoría.<br/><span className="text-blue-600">Elige tu sector y deja que la IA rastree las oportunidades.</span>
+            Guatecompras sin límites.<br/><span className="text-blue-600">Bajas cuantías, visitas presenciales y recuperación de proyectos de la competencia.</span>
           </h1>
-          <p className="text-xl text-slate-500 mb-10 max-w-2xl mx-auto">Tecnología, salud, construcción, suministros y más. Inteligencia artificial aplicada a tus licitaciones objetivo.</p>
+          <p className="text-xl text-slate-500 mb-10 max-w-2xl mx-auto">La plataforma definitiva con IA para dominar todas las contrataciones públicas en Guatemala.</p>
           <button onClick={() => setCurrentView('CHECKOUT')} className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 px-8 rounded-xl shadow-lg text-lg">Adquirir Licencia Q12,500 / año</button>
         </section>
       </div>
@@ -356,7 +338,13 @@ export default function App() {
                 <span className="text-xs font-bold px-2 py-1 bg-indigo-50 text-indigo-700 rounded uppercase">{selectedNog.procurementType}</span>
                 <h2 className="text-2xl font-black text-slate-900 mt-2">{selectedNog.title}</h2>
                 <p className="text-slate-600 font-medium flex items-center gap-2 mt-1"><Building2 size={16}/> {selectedNog.buyer}</p>
-                <span className="inline-block mt-2 bg-slate-100 text-slate-700 text-xs font-semibold px-2.5 py-1 rounded">Categoría: {selectedNog.category}</span>
+                
+                {/* 🚀 ALERTA DE VISITAS PRESENCIALES */}
+                {selectedNog.requiresOnSiteVisit && (
+                  <div className="mt-3 bg-purple-50 border border-purple-200 p-3 rounded-xl flex items-center gap-2 text-purple-800 text-xs font-bold">
+                    <Eye size={16}/> ⚠️ Este evento exige Visita Presencial / Junta de Aclaración: {selectedNog.onSiteVisitDetails.date} ({selectedNog.onSiteVisitDetails.location})
+                  </div>
+                )}
               </div>
               <div className="text-right">
                 <span className="text-xs text-slate-400 font-bold uppercase">Presupuesto Estimado</span>
@@ -370,33 +358,22 @@ export default function App() {
               <AlertTriangle size={18} className="text-amber-600"/> Matriz de Riesgo y Reputación de la Entidad Compradora
             </h3>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
-              <div className="bg-white p-3 rounded-xl border border-amber-100">
-                <span className="text-xs text-slate-500 font-bold uppercase">Efectividad Promedio de Pago</span>
-                <div className="text-lg font-black text-slate-800 mt-0.5">{selectedNog.institutionRisk?.avgPaymentDays}</div>
-              </div>
-              <div className="bg-white p-3 rounded-xl border border-amber-100">
-                <span className="text-xs text-slate-500 font-bold uppercase">Índice de Revocatoria</span>
-                <div className="text-lg font-black text-emerald-600 mt-0.5">{selectedNog.institutionRisk?.revocationRate}</div>
-              </div>
-              <div className="bg-white p-3 rounded-xl border border-amber-100">
-                <span className="text-xs text-slate-500 font-bold uppercase">Puntaje de Transparencia</span>
-                <div className="text-lg font-black text-blue-600 mt-0.5">{selectedNog.institutionRisk?.transparencyScore}</div>
-              </div>
+              <div className="bg-white p-3 rounded-xl border border-amber-100"><span className="text-xs text-slate-500 font-bold uppercase">Pago Promedio</span><div className="text-lg font-black text-slate-800 mt-0.5">{selectedNog.institutionRisk?.avgPaymentDays}</div></div>
+              <div className="bg-white p-3 rounded-xl border border-amber-100"><span className="text-xs text-slate-500 font-bold uppercase">Revocatoria</span><div className="text-lg font-black text-emerald-600 mt-0.5">{selectedNog.institutionRisk?.revocationRate}</div></div>
+              <div className="bg-white p-3 rounded-xl border border-amber-100"><span className="text-xs text-slate-500 font-bold uppercase">Transparencia</span><div className="text-lg font-black text-blue-600 mt-0.5">{selectedNog.institutionRisk?.transparencyScore}</div></div>
             </div>
           </div>
 
           <div className="bg-gradient-to-br from-blue-900 to-slate-900 text-white rounded-2xl p-6 shadow-lg">
             <h3 className="text-lg font-bold mb-2 flex items-center gap-2"><Zap className="text-amber-400"/> Simulador Predictivo de Oferta Ganadora (IA)</h3>
-            <p className="text-sm text-slate-300 mb-6">Ingresa tu costo base para calcular el precio óptimo frente al precio a vencer (Q {selectedNog.strategyIntelligence?.priceToBeat?.toLocaleString()}).</p>
+            <p className="text-sm text-slate-300 mb-6">Calcula tu margen óptimo frente al precio a vencer (Q {selectedNog.strategyIntelligence?.priceToBeat?.toLocaleString()}).</p>
             
             <div className="flex flex-col md:flex-row gap-4 items-center mb-6">
               <div className="w-full md:flex-1">
                 <label className="block text-xs font-bold text-slate-300 uppercase mb-1">Costo Base (Q)</label>
                 <input type="number" value={ourCost} onChange={(e) => setOurCost(e.target.value)} placeholder="Ej. 110000" className="w-full px-4 py-2.5 rounded-xl bg-slate-800 border border-slate-700 text-white outline-none focus:border-blue-500" />
               </div>
-              <button onClick={() => handleRunSimulation(selectedNog.strategyIntelligence?.priceToBeat)} className="w-full md:w-auto bg-blue-600 hover:bg-blue-700 text-white font-bold px-6 py-3 rounded-xl transition-all self-end">
-                Simular Propuesta
-              </button>
+              <button onClick={() => handleRunSimulation(selectedNog.strategyIntelligence?.priceToBeat)} className="w-full md:w-auto bg-blue-600 hover:bg-blue-700 text-white font-bold px-6 py-3 rounded-xl transition-all self-end">Simular Propuesta</button>
             </div>
 
             {simulationResult && (
@@ -404,7 +381,7 @@ export default function App() {
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   <div><span className="text-xs text-slate-400 uppercase">Oferta Sugerida IA</span><div className="text-2xl font-black text-emerald-400">Q {simulationResult.suggestedBid}</div></div>
                   <div><span className="text-xs text-slate-400 uppercase">Margen Estimado</span><div className="text-2xl font-black text-blue-400">{simulationResult.estimatedMargin}%</div></div>
-                  <div><span className="text-xs text-slate-400 uppercase">Probabilidad de Éxito</span><div className="text-2xl font-black text-amber-400">{simulationResult.winProbability}</div></div>
+                  <div><span className="text-xs text-slate-400 uppercase">Probabilidad</span><div className="text-2xl font-black text-amber-400">{simulationResult.winProbability}</div></div>
                 </div>
               </div>
             )}
@@ -414,13 +391,10 @@ export default function App() {
     );
   }
 
-  // ==========================================
-  // VISTA 4: PANEL CLIENTE CON SELECTOR DE CATEGORÍA
-  // ==========================================
   return (
     <div className="min-h-screen bg-slate-100 font-sans flex">
       
-      {/* BARRA LATERAL NOGHUNTER PRO */}
+      {/* BARRA LATERAL CON MÓDULO DE RECUPERACIÓN DE COMPETENCIA */}
       <aside className="w-64 bg-slate-900 text-slate-300 flex flex-col justify-between hidden md:flex sticky top-0 h-screen">
         <div>
           <div className="p-6 border-b border-slate-800 flex items-center gap-2 text-white font-black text-xl tracking-tighter">
@@ -436,6 +410,9 @@ export default function App() {
             <button onClick={() => setActiveTab('PRESUPUESTOS')} className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all ${activeTab === 'PRESUPUESTOS' ? 'bg-blue-600 text-white shadow-lg' : 'hover:bg-slate-800 text-slate-400'}`}>
               <PieChart size={18}/> Análisis Presupuestario
             </button>
+            <button onClick={() => setActiveTab('RECUPERACION')} className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all ${activeTab === 'RECUPERACION' ? 'bg-blue-600 text-white shadow-lg' : 'hover:bg-slate-800 text-slate-400'}`}>
+              <RefreshCw size={18}/> Recuperar de Competencia
+            </button>
             <button onClick={() => setActiveTab('LABORATORIO')} className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all ${activeTab === 'LABORATORIO' ? 'bg-blue-600 text-white shadow-lg' : 'hover:bg-slate-800 text-slate-400'}`}>
               <Cpu size={18}/> Laboratorio de Reglas
             </button>
@@ -449,7 +426,7 @@ export default function App() {
       {/* CONTENIDO PRINCIPAL */}
       <div className="flex-1 flex flex-col min-w-0">
         <nav className="bg-white border-b border-slate-200 px-6 py-4 flex justify-between items-center sticky top-0 z-10 shadow-sm">
-          <h1 className="text-lg font-bold text-slate-800">Centro de Inteligencia Comercial & Selección Multicategoría</h1>
+          <h1 className="text-lg font-bold text-slate-800">Centro de Inteligencia Comercial & Bajas Cuantías</h1>
           <span className="text-sm font-bold text-emerald-600">Bolsón IA: 48,500 / 50,000 Tokens</span>
         </nav>
 
@@ -458,30 +435,43 @@ export default function App() {
           {activeTab === 'PRESUPUESTOS' ? (
             <div className="space-y-6">
               <div className="bg-white rounded-2xl p-6 shadow-sm border border-slate-200">
-                <h3 className="text-lg font-bold text-slate-800 mb-2 flex items-center gap-2"><TrendingUp className="text-blue-600"/> Proyección y Análisis de Presupuesto Público</h3>
-                <p className="text-sm text-slate-500 mb-6">Desglose por categorías y sectores.</p>
+                <h3 className="text-lg font-bold text-slate-800 mb-2 flex items-center gap-2"><TrendingUp className="text-blue-600"/> Análisis Presupuestario por Institución</h3>
+                <p className="text-sm text-slate-500">Proyección de gasto público.</p>
+              </div>
+            </div>
+          ) : activeTab === 'RECUPERACION' ? (
+            /* 🚀 NUEVO MÓDULO: RECUPERAR O ADQUIRIR PROYECTOS DE LA COMPETENCIA */
+            <div className="space-y-6">
+              <div className="bg-white rounded-2xl p-6 shadow-sm border border-slate-200">
+                <h3 className="text-lg font-bold text-slate-800 mb-2 flex items-center gap-2"><RefreshCw className="text-blue-600"/> Módulo de Recuperación y Adquisición de Proyectos de la Competencia</h3>
+                <p className="text-sm text-slate-500 mb-6">Analiza qué contratos ganó la competencia en años anteriores para preparar estrategias anticipadas de licitación y arrebatarles la cuenta.</p>
+                
+                <div className="space-y-4">
+                  <div className="bg-slate-50 p-4 rounded-xl border border-slate-200 flex justify-between items-center">
+                    <div>
+                      <span className="text-xs font-bold bg-indigo-100 text-indigo-700 px-2.5 py-1 rounded-full">CONTRATO ANUAL #44821</span>
+                      <h4 className="font-bold text-slate-800 mt-1">Soporte Tecnológico Integral - Minfin</h4>
+                      <p className="text-xs text-slate-500 mt-0.5">Adjudicado actualmente a: <span className="font-bold text-amber-600">CiberSec S.A.</span> (Vence en Q1 2026)</p>
+                    </div>
+                    <button onClick={() => alert('Generando estrategia de contraoferta con IA...')} className="bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold px-4 py-2.5 rounded-xl">Analizar para Recuperar</button>
+                  </div>
+                </div>
               </div>
             </div>
           ) : (
             <div className="space-y-8">
               
-              {/* 🚀 SELECTOR DINÁMICO DE CATEGORÍAS */}
+              {/* SELECTOR DE CATEGORÍA */}
               <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 space-y-3">
-                <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider">Filtrar por Categoría de Interés (Selecciona tu Sector)</label>
+                <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider">Filtrar por Categoría (Incluye Bajas Cuantías y Todos los Sectores)</label>
                 <div className="flex flex-wrap gap-2">
                   {['TODAS', 'Tecnología y Cloud', 'Salud e Insumos Médicos', 'Construcción y Obra Grís', 'Telecomunicaciones', 'Servicios Generales'].map((cat) => (
-                    <button 
-                      key={cat} 
-                      onClick={() => setSelectedCategory(cat)} 
-                      className={`px-4 py-2 rounded-xl text-xs font-bold transition-all ${selectedCategory === cat ? 'bg-blue-600 text-white shadow-md' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'}`}
-                    >
-                      {cat}
-                    </button>
+                    <button key={cat} onClick={() => setSelectedCategory(cat)} className={`px-4 py-2 rounded-xl text-xs font-bold transition-all ${selectedCategory === cat ? 'bg-blue-600 text-white shadow-md' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'}`}>{cat}</button>
                   ))}
                 </div>
               </div>
 
-              {/* BUSCADOR ABIERTO Y FILTROS DE TIPO */}
+              {/* BUSCADOR Y FILTROS (INCLUYENDO COMPRA DIRECTA / BAJAS CUANTÍAS) */}
               <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 flex flex-col md:flex-row gap-4 justify-between items-center">
                 <div className="flex items-center gap-2 w-full md:w-auto">
                   <Search className="text-slate-400" size={20}/>
@@ -494,11 +484,11 @@ export default function App() {
                 </div>
               </div>
 
-              {/* LISTADO DE OPORTUNIDADES FILTRADAS POR TU CATEGORÍA */}
+              {/* LISTADO DE OPORTUNIDADES */}
               <div className="space-y-6">
                 {filteredNogs.length === 0 ? (
                   <div className="bg-white rounded-xl p-8 text-center border border-slate-200">
-                    <p className="text-slate-500">No hay licitaciones para esta categoría en este momento. La IA sigue escaneando Guatecompras.</p>
+                    <p className="text-slate-500">No hay licitaciones para los filtros seleccionados.</p>
                   </div>
                 ) : (
                   filteredNogs.map((op) => (
@@ -508,6 +498,9 @@ export default function App() {
                           <span className="bg-blue-100 text-blue-800 text-xs font-bold px-3 py-1 rounded-full">NOG: {op.nog}</span>
                           <span className="bg-purple-50 text-purple-700 text-xs font-bold px-3 py-1 rounded-full border border-purple-200">{op.procurementType}</span>
                           <span className="bg-emerald-50 text-emerald-700 text-xs font-bold px-3 py-1 rounded-full border border-emerald-200">{op.category}</span>
+                          {op.requiresOnSiteVisit && (
+                            <span className="bg-amber-100 text-amber-800 text-[11px] font-bold px-2.5 py-0.5 rounded flex items-center gap-1"><Eye size={12}/> Visita Presencial Exigida</span>
+                          )}
                         </div>
                         <h3 className="text-xl font-bold text-slate-800 mb-1">{op.title}</h3>
                         <p className="text-slate-600 font-medium flex items-center gap-2 mb-4"><Building2 size={16}/> {op.buyer}</p>
