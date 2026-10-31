@@ -6,13 +6,12 @@ import User from '../models/User';
 const router = Router();
 
 // ==========================================
-// 1. OBTENER TODAS LAS EMPRESAS (El que causaba el error 404)
+// 1. OBTENER TODAS LAS EMPRESAS (Faltaba esto)
 // ==========================================
 router.get('/tenants', async (req, res) => {
   try {
     const companies = await Company.find().sort({ createdAt: -1 });
     
-    // Mapear los datos para que coincidan con lo que espera el frontend
     const formattedCompanies = companies.map(company => ({
       id: company._id,
       name: company.name,
@@ -36,13 +35,11 @@ router.post('/tenants/create', async (req, res) => {
   try {
     const { companyName, nit, adminName, adminEmail } = req.body;
 
-    // Verificar si ya existe el NIT
     const existingCompany = await Company.findOne({ nit });
     if (existingCompany) {
       return res.status(400).json({ error: 'Ya existe una empresa registrada con este NIT.' });
     }
 
-    // Crear la Empresa
     const newCompany = new Company({
       name: companyName,
       nit: nit,
@@ -57,7 +54,6 @@ router.post('/tenants/create', async (req, res) => {
 
     const savedCompany = await newCompany.save();
 
-    // Generar credenciales
     const temporalPassword = Math.random().toString(36).slice(-8);
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(temporalPassword, salt);
