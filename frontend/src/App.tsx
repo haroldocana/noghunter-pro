@@ -34,7 +34,6 @@ export default function App() {
     }
 
     try {
-      // 🛠️ FIX: Ruta relativa para evitar CORS
       const response = await fetch('/api/auth/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -70,7 +69,6 @@ export default function App() {
     setSuccessMsg('');
 
     try {
-      // 🛠️ FIX: Ruta relativa para evitar CORS
       const response = await fetch('/api/payments/webhook', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -103,7 +101,6 @@ export default function App() {
   useEffect(() => {
     if (currentView === 'CLIENT') {
       setIsLoading(true);
-      // 🛠️ FIX: Ruta relativa para evitar CORS
       fetch('/api/nogs')
         .then((res) => res.json())
         .then((data) => {
@@ -124,7 +121,6 @@ export default function App() {
   // Carga dinámica de empresas (SUPERADMIN)
   useEffect(() => {
     if (currentView === 'SUPERADMIN') {
-      // 🛠️ FIX: Ruta relativa para evitar CORS y traer la tabla limpia
       fetch('/api/admin/tenants')
         .then((res) => res.json())
         .then((data) => {
@@ -141,7 +137,6 @@ export default function App() {
     setCreatingCompany(true);
 
     try {
-      // 🛠️ FIX: Ruta relativa para crear empresa manual sin fallos de dominio
       const response = await fetch('/api/admin/tenants/create', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -162,6 +157,28 @@ export default function App() {
       alert('Error de conexión con el servidor');
     } finally {
       setCreatingCompany(false);
+    }
+  };
+
+  // 🚀 Función para generar/actualizar credenciales desde el SuperAdmin
+  const handleGenerateCredentials = async (companyId: string) => {
+    const newPass = prompt("Ingresa la nueva contraseña temporal para el administrador de esta empresa:");
+    if (!newPass) return;
+
+    try {
+      const response = await fetch(`/api/admin/tenants/${companyId}/reset-password`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ newPassword: newPass })
+      });
+      const data = await response.json();
+      if (response.ok) {
+        alert('¡Contraseña actualizada exitosamente! Ya puedes iniciar sesión con ella.');
+      } else {
+        alert(data.error || 'Error al actualizar credenciales');
+      }
+    } catch (err) {
+      alert('Error de conexión con el servidor');
     }
   };
 
@@ -374,7 +391,12 @@ export default function App() {
                   <div className="flex justify-between"><span className="text-slate-400">Usuarios:</span><span className="font-medium">{company.users} / 5 Max</span></div>
                   <div className="flex justify-between"><span className="text-slate-400">Bolsón IA:</span><span className="text-emerald-400 font-medium">{company.aiUsed?.toLocaleString()} / {company.aiTotal?.toLocaleString()}</span></div>
                 </div>
-                <button className="w-full bg-slate-700 hover:bg-slate-600 text-white py-2 rounded text-sm font-medium transition-colors">Generar Credenciales</button>
+                <button 
+                  onClick={() => handleGenerateCredentials(company.id || company._id)}
+                  className="w-full bg-slate-700 hover:bg-slate-600 text-white py-2 rounded text-sm font-medium transition-colors"
+                >
+                  Generar Credenciales
+                </button>
               </div>
             ))}
           </div>
