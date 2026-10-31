@@ -30,10 +30,11 @@ export default function App() {
     if (cleanEmail === 'haroldocana@comptech.lat' && password === 'Admin123*') {
       setCurrentView('SUPERADMIN');
       setIsLoading(false);
-      return; // Detiene la ejecución aquí y te da acceso inmediato
+      return; 
     }
 
     try {
+      // 🛠️ FIX: Ruta relativa para evitar CORS
       const response = await fetch('/api/auth/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -69,7 +70,8 @@ export default function App() {
     setSuccessMsg('');
 
     try {
-      const response = await fetch('https://noghunter-pro-1.onrender.com/api/payments/webhook', {
+      // 🛠️ FIX: Ruta relativa para evitar CORS
+      const response = await fetch('/api/payments/webhook', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -101,7 +103,8 @@ export default function App() {
   useEffect(() => {
     if (currentView === 'CLIENT') {
       setIsLoading(true);
-      fetch('https://noghunter-pro-1.onrender.com/api/nogs')
+      // 🛠️ FIX: Ruta relativa para evitar CORS
+      fetch('/api/nogs')
         .then((res) => res.json())
         .then((data) => {
           if (Array.isArray(data) && data.length > 0) {
@@ -121,7 +124,8 @@ export default function App() {
   // Carga dinámica de empresas (SUPERADMIN)
   useEffect(() => {
     if (currentView === 'SUPERADMIN') {
-      fetch('https://noghunter-pro-1.onrender.com/api/admin/tenants')
+      // 🛠️ FIX: Ruta relativa para evitar CORS y traer la tabla limpia
+      fetch('/api/admin/tenants')
         .then((res) => res.json())
         .then((data) => {
           if (Array.isArray(data)) {
@@ -137,7 +141,8 @@ export default function App() {
     setCreatingCompany(true);
 
     try {
-      const response = await fetch('https://noghunter-pro-1.onrender.com/api/admin/tenants/create', {
+      // 🛠️ FIX: Ruta relativa para crear empresa manual sin fallos de dominio
+      const response = await fetch('/api/admin/tenants/create', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(newCompanyForm)
