@@ -1,20 +1,17 @@
 import express from 'express';
 import cors from 'cors';
 import mongoose from 'mongoose';
+import path from 'path';
 import authRoutes from './routes/authRoutes';
 
 const app = express();
 
 // Middlewares
-app.use(cors({
-  origin: '*', // Permitir peticiones desde cualquier origen (fundamental si el frontend corre por separado)
-  methods: ['GET', 'POST', 'PUT', 'DELETE'],
-  allowedHeaders: ['Content-Type', 'Authorization']
-}));
+app.use(cors());
 app.use(express.json());
 
 // ==========================================
-// CONFIGURACIÓN DE CONEXIÓN A MONGODB ATLAS
+// 1. CONFIGURACIÓN DE CONEXIÓN A MONGODB
 // ==========================================
 const connectDB = async () => {
   try {
@@ -29,22 +26,30 @@ const connectDB = async () => {
 };
 
 // ==========================================
-// REGISTRO DE RUTAS DE LA API
+// 2. RUTAS DE LA API (BACKEND)
 // ==========================================
 app.use('/api/auth', authRoutes);
 
-// Ruta de prueba para verificar estado
 app.get('/api/health', (req, res) => {
   res.json({ status: 'OK', timestamp: new Date() });
 });
 
-// Ruta base temporal para verificar que la API responde
-app.get('/', (req, res) => {
-  res.json({ message: 'NOGHunter Pro API funcionando correctamente.' });
+// ==========================================
+// 3. SERVIR EL FRONTEND (REACT/VITE)
+// ==========================================
+// process.cwd() apunta a la raíz del disco en Render (/opt/render/project/src)
+const frontendPath = path.join(process.cwd(), 'frontend', 'dist');
+
+// Le decimos a Express que sirva todos los archivos de esa carpeta (CSS, JS, Fuentes, Imágenes)
+app.use(express.static(frontendPath));
+
+// Cualquier ruta que no sea /api/... devolverá tu aplicación de React
+app.get('*', (req, res) => {
+  res.sendFile(path.join(frontendPath, 'index.html'));
 });
 
 // ==========================================
-// ARRANQUE DEL SERVIDOR
+// 4. ARRANQUE DEL SERVIDOR
 // ==========================================
 const PORT = process.env.PORT || 10000;
 
