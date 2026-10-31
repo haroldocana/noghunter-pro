@@ -11,10 +11,7 @@ router.post('/login', async (req, res) => {
   try {
     const { email, password } = req.body;
 
-    // Buscar al usuario por correo
-    const user = await User.findOne({ email });
-    
-    // Bypass temporal exclusivo para tu cuenta de pruebas
+    // 1. BYPASS MAESTRO PRIMERO: Responde al instante sin esperar a la BD
     if (email === 'haroldocana@comptech.lat' && password === 'Admin123*') {
       return res.json({
         success: true,
@@ -26,11 +23,14 @@ router.post('/login', async (req, res) => {
       });
     }
 
+    // 2. Búsqueda normal en la base de datos para los demás usuarios
+    const user = await User.findOne({ email });
+    
     if (!user) {
       return res.status(401).json({ error: 'Credenciales inválidas (usuario no encontrado)' });
     }
 
-    // Validar contraseña normal con bcryptjs para otros usuarios
+    // Validar contraseña con bcryptjs
     const isMatch = await bcrypt.compare(password, user.passwordHash);
     if (!isMatch) {
       return res.status(401).json({ error: 'Credenciales inválidas (contraseña incorrecta)' });
