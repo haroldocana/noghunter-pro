@@ -66,7 +66,7 @@ export default function App() {
     }
   }, [currentView]);
 
-  // 🚀 GENERADOR CON EXTRACCIÓN DE REQUISITOS HABILITANTES Y SUB-FILTROS EXACTOS
+  // 🚀 GENERADOR MÁSTER: EXTRAE REQUISITOS, ASIGNA ESPECIALIDAD Y CREA TIEMPOS DE CIERRE ORGÁNICOS
   const generar327AlertasMasivas = () => {
     const baseRealNogs = [
       { nog: "15412431", title: "CONTRATO ABIERTO NÚMERO 04-2021 ADQUISICIÓN DE MATERIAL MÉDICO", buyer: "MINISTERIO DE SALUD PÚBLICA Y ASISTENCIA SOCIAL (MSPAS)", procurementType: "CONTRATO ABIERTO", category: "Salud e insumos hospitalarios", product: "Material Médico", winner: "PharmaLatam S.A." },
@@ -91,6 +91,12 @@ export default function App() {
       const exactSpecialty = isTech ? techSubFilters[i % techSubFilters.length] : "General";
       const detectedReqs = isTech ? techReqs[i % techReqs.length] : genReqs[i % genReqs.length];
 
+      // 💡 ALEATORIEDAD PONDERADA PARA LOS CIERRES
+      const rand = Math.random();
+      let tiempoCierre = "Más de 3 Días"; 
+      if (rand < 0.12) tiempoCierre = "Cierra Hoy"; // 12% cierran hoy
+      else if (rand < 0.30) tiempoCierre = "Cierra Mañana"; // 18% cierran mañana
+
       generated.push({
         id: simulatedNog,
         nog: simulatedNog,
@@ -103,7 +109,7 @@ export default function App() {
         detectedRequirements: detectedReqs,
         estimatedBudget: Math.floor(Math.random() * 900000) + 45000.00,
         matchScore: Math.floor(Math.random() * 60) + 40,
-        closingTime: i % 3 === 0 ? "Cierra Hoy" : (i % 2 === 0 ? "Cierra Mañana" : "Más de 3 Días"),
+        closingTime: tiempoCierre, // Asignación aleatoria realista
         requiresOnSiteVisit: i % 4 === 0,
         onSiteVisitDetails: { date: "15/11/2026 10:00 AM", location: "Sede Central" },
         institutionRisk: { avgPaymentDays: (Math.floor(Math.random() * 30) + 15) + " días", revocationRate: (Math.random() * 3).toFixed(1) + "%", transparencyScore: (Math.floor(Math.random() * 15) + 80) + " / 100" },
@@ -373,7 +379,7 @@ export default function App() {
 
         <main className="p-6 md:p-8 space-y-8 overflow-y-auto">
           
-          {/* TAB 1: DASHBOARD RESTAURADO */}
+          {/* TAB 1: DASHBOARD RESTAURADO Y CON CÁLCULO ORGÁNICO */}
           {activeTab === 'DASHBOARD' && (
             <div className="space-y-8">
               <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
