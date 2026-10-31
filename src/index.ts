@@ -1,6 +1,7 @@
 import express from 'express';
 import cors from 'cors';
 import mongoose from 'mongoose';
+import path from 'path';
 import authRoutes from './routes/authRoutes';
 
 const app = express();
@@ -33,6 +34,18 @@ app.use('/api/auth', authRoutes);
 // Ruta de prueba para verificar estado
 app.get('/api/health', (req, res) => {
   res.json({ status: 'OK', timestamp: new Date() });
+});
+
+// ==========================================
+// SERVIR EL FRONTEND ESTÁTICO EN PRODUCCIÓN
+// ==========================================
+// Apunta a la carpeta dist generada durante el build de tu frontend
+const frontendPath = path.join(__dirname, '../frontend/dist');
+app.use(express.static(frontendPath));
+
+// Cualquier otra ruta que no sea de la API devolverá el index.html de React
+app.get('*', (req, res) => {
+  res.sendFile(path.join(frontendPath, 'index.html'));
 });
 
 // ==========================================
