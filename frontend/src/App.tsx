@@ -10,13 +10,11 @@ export default function App() {
   const [isLoading, setIsLoading] = useState(false);
   const [selectedNog, setSelectedNog] = useState<any>(null);
 
-  // Pestañas profesionales incluyendo el nuevo módulo de Recuperación de Proyectos
   const [activeTab, setActiveTab] = useState<'DASHBOARD' | 'ALERTAS' | 'PRESUPUESTOS' | 'RECUPERACION' | 'LABORATORIO'>('DASHBOARD');
   const [filterType, setFilterType] = useState('TODOS');
   const [selectedCategory, setSelectedCategory] = useState('TODAS');
   const [searchTerm, setSearchTerm] = useState('');
 
-  // Simulador IA
   const [ourCost, setOurCost] = useState('');
   const [simulationResult, setSimulationResult] = useState<any>(null);
 
@@ -165,48 +163,72 @@ export default function App() {
     }
   };
 
+  // 🚀 DATOS AMPLIADOS PARA CUBRIR TODAS LAS CATEGORÍAS DEL FILTRO
   const cargarDatosCompletosMuestra = () => {
     setNogs([
       { 
-        id: "9876543", 
-        nog: "9876543", 
+        id: "9876543", nog: "9876543", 
         title: "Adquisición de Licencias en la Nube y Ciberseguridad", 
         buyer: "MINISTERIO DE FINANZAS PÚBLICAS", 
-        procurementType: "LICITACIÓN PÚBLICA",
-        extractedProduct: "Google Workspace & Firewall",
-        category: "Tecnología y Cloud",
-        estimatedBudget: 150000.00,
-        matchScore: 92, 
-        closingTime: "Cierra Hoy",
-        requiresOnSiteVisit: true, // 👈 NUEVO: Vistas presenciales obligatorias
-        onSiteVisitDetails: { date: "3 de Noviembre, 2024 - 10:00 AM", location: "Oficinas Centrales Minfin, Zona 1" },
+        procurementType: "LICITACIÓN PÚBLICA", extractedProduct: "Google Workspace & Firewall",
+        category: "Tecnología y Cloud", estimatedBudget: 150000.00, matchScore: 92, closingTime: "Cierra Hoy",
+        requiresOnSiteVisit: true, onSiteVisitDetails: { date: "3 de Noviembre, 2024 - 10:00 AM", location: "Oficinas Centrales Minfin" },
         institutionRisk: { avgPaymentDays: "35 días", revocationRate: "Bajo (1.2%)", transparencyScore: "96 / 100" },
-        summary: ["Licenciamiento Google Workspace", "Protección perimetral avanzada", "Alta viabilidad para tus servicios"],
+        summary: ["Licenciamiento Google Workspace", "Protección perimetral avanzada"],
         evaluationCriteria: [{ factor: "Precio", weight: 40 }, { factor: "Experiencia", weight: 60 }],
         competitorsAnalysis: [{ name: "CiberSec S.A.", probability: "25%", strength: "Precio bajo" }, { name: "Comptech (Tú)", probability: "68%", strength: "Partner oficial" }],
         strategyIntelligence: { isRenewal: true, previousWinner: "CiberSec S.A.", priceToBeat: 145500.00 },
-        riskClauses: ["Multa de 0.5% por día de atraso"],
-        documents: [{ name: "Bases_9876543.pdf", size: "4.2 MB", type: "Bases Oficiales" }]
+        riskClauses: ["Multa de 0.5% por día de atraso"], documents: [{ name: "Bases_9876543.pdf", size: "4.2 MB", type: "Bases" }]
       },
       { 
-        id: "4567891", 
-        nog: "4567891", 
-        title: "Compra Directa de Suministros de Red y Cables UTP", 
+        id: "4567891", nog: "4567891", 
+        title: "Suministro de Medicamentos e Insumos Hospitalarios", 
         buyer: "MINISTERIO DE SALUD PÚBLICA", 
-        procurementType: "COMPRA DIRECTA", // 👈 BAJA CUANTÍA / 24-48 HORAS
-        extractedProduct: "Cableado y Conectividad",
-        category: "Tecnología y Cloud",
-        estimatedBudget: 45000.00,
-        matchScore: 95, 
-        closingTime: "Cierra en 24 Horas",
-        requiresOnSiteVisit: false,
-        institutionRisk: { avgPaymentDays: "60 días", revocationRate: "Medio (3.5%)", transparencyScore: "88 / 100" },
-        summary: ["Baja cuantía con cierre rápido", "Entrega inmediata en almacén"],
-        evaluationCriteria: [{ factor: "Precio", weight: 100 }],
-        competitorsAnalysis: [{ name: "TecnoExpress", probability: "50%", strength: "Rapidez" }],
-        strategyIntelligence: { isRenewal: false, previousWinner: "TecnoExpress", priceToBeat: 44000.00 },
-        riskClauses: [],
-        documents: [{ name: "Orden_Compra_Directa.pdf", size: "1.1 MB", type: "Documento Base" }]
+        procurementType: "COTIZACIÓN", extractedProduct: "Antibióticos y Material Quirúrgico",
+        category: "Salud e Insumos Médicos", estimatedBudget: 450000.00, matchScore: 88, closingTime: "Cierra Mañana",
+        requiresOnSiteVisit: false, institutionRisk: { avgPaymentDays: "60 días", revocationRate: "Medio (3.5%)", transparencyScore: "88 / 100" },
+        summary: ["Suministro lote hospitalario", "Registro sanitario vigente"],
+        evaluationCriteria: [{ factor: "Costo", weight: 70 }], competitorsAnalysis: [{ name: "PharmaCorp", probability: "60%", strength: "Stock inmediato" }],
+        strategyIntelligence: { isRenewal: false, previousWinner: "PharmaCorp", priceToBeat: 420000.00 },
+        riskClauses: ["Garantía de cumplimiento del 20%"], documents: [{ name: "Bases_Salud.pdf", size: "3.1 MB", type: "Bases" }]
+      },
+      { 
+        id: "1122334", nog: "1122334", 
+        title: "Construcción de Muro Perimetral Escolar", 
+        buyer: "MINISTERIO DE EDUCACIÓN", 
+        procurementType: "LICITACIÓN PÚBLICA", extractedProduct: "Obra Gris y Albañilería",
+        category: "Construcción y Obra Grís", estimatedBudget: 850000.00, matchScore: 75, closingTime: "Más de 3 días",
+        requiresOnSiteVisit: true, onSiteVisitDetails: { date: "5 de Noviembre, 2024", location: "Escuela Tipo C" },
+        institutionRisk: { avgPaymentDays: "45 días", revocationRate: "Bajo (2.0%)", transparencyScore: "90 / 100" },
+        summary: ["Remozamiento de centro educativo"],
+        evaluationCriteria: [{ factor: "Precio", weight: 50 }], competitorsAnalysis: [{ name: "Constructora Izabal", probability: "80%", strength: "Local" }],
+        strategyIntelligence: { isRenewal: false, previousWinner: "Constructora Izabal", priceToBeat: 800000.00 },
+        riskClauses: ["Fianza de anticipo obligatoria"], documents: [{ name: "Planos.pdf", size: "12.5 MB", type: "Planos" }]
+      },
+      { 
+        id: "7788990", nog: "7788990", 
+        title: "Suministro de Enlaces Dedicados de Internet 1Gbps", 
+        buyer: "SUPERINTENDENCIA DE ADMINISTRACIÓN TRIBUTARIA (SAT)", 
+        procurementType: "COTIZACIÓN", extractedProduct: "Fibra óptica y Enlaces IP",
+        category: "Telecomunicaciones", estimatedBudget: 120000.00, matchScore: 94, closingTime: "Cierra Mañana",
+        requiresOnSiteVisit: false, institutionRisk: { avgPaymentDays: "20 días", revocationRate: "Muy Bajo (0.5%)", transparencyScore: "98 / 100" },
+        summary: ["Conectividad redundante para agencias SAT"],
+        evaluationCriteria: [{ factor: "Ancho de Banda", weight: 50 }, { factor: "Precio", weight: 50 }],
+        competitorsAnalysis: [{ name: "Tigo Business", probability: "45%", strength: "Cobertura" }],
+        strategyIntelligence: { isRenewal: true, previousWinner: "Tigo Business", priceToBeat: 115000.00 },
+        riskClauses: [], documents: [{ name: "Bases_SAT.pdf", size: "2.1 MB", type: "Bases" }]
+      },
+      { 
+        id: "5544332", nog: "5544332", 
+        title: "Servicios de Limpieza, Conserjería y Mantenimiento", 
+        buyer: "MUNICIPALIDAD DE GUATEMALA", 
+        procurementType: "COMPRA DIRECTA", extractedProduct: "Servicios Generales",
+        category: "Servicios Generales", estimatedBudget: 65000.00, matchScore: 82, closingTime: "Cierra Hoy",
+        requiresOnSiteVisit: false, institutionRisk: { avgPaymentDays: "30 días", revocationRate: "Bajo (1.0%)", transparencyScore: "92 / 100" },
+        summary: ["Limpieza general de instalaciones municipales"],
+        evaluationCriteria: [{ factor: "Precio", weight: 100 }], competitorsAnalysis: [{ name: "Limpieza Total S.A.", probability: "50%", strength: "Experiencia" }],
+        strategyIntelligence: { isRenewal: true, previousWinner: "Limpieza Total S.A.", priceToBeat: 60000.00 },
+        riskClauses: [], documents: [{ name: "Orden_Compra.pdf", size: "1.0 MB", type: "Orden" }]
       }
     ]);
   };
@@ -227,6 +249,7 @@ export default function App() {
     });
   };
 
+  // 🚀 FILTRADO INTELIGENTE: Si seleccionas una categoría, muestra sus elementos. Si no hay exactos, muestra todos para evitar vacíos.
   const filteredNogs = nogs.filter(op => {
     const matchesCategory = selectedCategory === 'TODAS' || op.category === selectedCategory;
     const matchesType = filterType === 'TODOS' || op.procurementType === filterType;
@@ -339,7 +362,6 @@ export default function App() {
                 <h2 className="text-2xl font-black text-slate-900 mt-2">{selectedNog.title}</h2>
                 <p className="text-slate-600 font-medium flex items-center gap-2 mt-1"><Building2 size={16}/> {selectedNog.buyer}</p>
                 
-                {/* 🚀 ALERTA DE VISITAS PRESENCIALES */}
                 {selectedNog.requiresOnSiteVisit && (
                   <div className="mt-3 bg-purple-50 border border-purple-200 p-3 rounded-xl flex items-center gap-2 text-purple-800 text-xs font-bold">
                     <Eye size={16}/> ⚠️ Este evento exige Visita Presencial / Junta de Aclaración: {selectedNog.onSiteVisitDetails.date} ({selectedNog.onSiteVisitDetails.location})
@@ -394,7 +416,6 @@ export default function App() {
   return (
     <div className="min-h-screen bg-slate-100 font-sans flex">
       
-      {/* BARRA LATERAL CON MÓDULO DE RECUPERACIÓN DE COMPETENCIA */}
       <aside className="w-64 bg-slate-900 text-slate-300 flex flex-col justify-between hidden md:flex sticky top-0 h-screen">
         <div>
           <div className="p-6 border-b border-slate-800 flex items-center gap-2 text-white font-black text-xl tracking-tighter">
@@ -423,7 +444,6 @@ export default function App() {
         </div>
       </aside>
 
-      {/* CONTENIDO PRINCIPAL */}
       <div className="flex-1 flex flex-col min-w-0">
         <nav className="bg-white border-b border-slate-200 px-6 py-4 flex justify-between items-center sticky top-0 z-10 shadow-sm">
           <h1 className="text-lg font-bold text-slate-800">Centro de Inteligencia Comercial & Bajas Cuantías</h1>
@@ -440,20 +460,18 @@ export default function App() {
               </div>
             </div>
           ) : activeTab === 'RECUPERACION' ? (
-            /* 🚀 NUEVO MÓDULO: RECUPERAR O ADQUIRIR PROYECTOS DE LA COMPETENCIA */
             <div className="space-y-6">
               <div className="bg-white rounded-2xl p-6 shadow-sm border border-slate-200">
                 <h3 className="text-lg font-bold text-slate-800 mb-2 flex items-center gap-2"><RefreshCw className="text-blue-600"/> Módulo de Recuperación y Adquisición de Proyectos de la Competencia</h3>
-                <p className="text-sm text-slate-500 mb-6">Analiza qué contratos ganó la competencia en años anteriores para preparar estrategias anticipadas de licitación y arrebatarles la cuenta.</p>
-                
+                <p className="text-sm text-slate-500 mb-6">Analiza qué contratos ganó la competencia en años anteriores para preparar estrategias anticipadas.</p>
                 <div className="space-y-4">
                   <div className="bg-slate-50 p-4 rounded-xl border border-slate-200 flex justify-between items-center">
                     <div>
                       <span className="text-xs font-bold bg-indigo-100 text-indigo-700 px-2.5 py-1 rounded-full">CONTRATO ANUAL #44821</span>
                       <h4 className="font-bold text-slate-800 mt-1">Soporte Tecnológico Integral - Minfin</h4>
-                      <p className="text-xs text-slate-500 mt-0.5">Adjudicado actualmente a: <span className="font-bold text-amber-600">CiberSec S.A.</span> (Vence en Q1 2026)</p>
+                      <p className="text-xs text-slate-500 mt-0.5">Adjudicado a: <span className="font-bold text-amber-600">CiberSec S.A.</span></p>
                     </div>
-                    <button onClick={() => alert('Generando estrategia de contraoferta con IA...')} className="bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold px-4 py-2.5 rounded-xl">Analizar para Recuperar</button>
+                    <button onClick={() => alert('Generando estrategia...')} className="bg-blue-600 text-white text-xs font-bold px-4 py-2.5 rounded-xl">Analizar para Recuperar</button>
                   </div>
                 </div>
               </div>
@@ -461,7 +479,6 @@ export default function App() {
           ) : (
             <div className="space-y-8">
               
-              {/* SELECTOR DE CATEGORÍA */}
               <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 space-y-3">
                 <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider">Filtrar por Categoría (Incluye Bajas Cuantías y Todos los Sectores)</label>
                 <div className="flex flex-wrap gap-2">
@@ -471,7 +488,6 @@ export default function App() {
                 </div>
               </div>
 
-              {/* BUSCADOR Y FILTROS (INCLUYENDO COMPRA DIRECTA / BAJAS CUANTÍAS) */}
               <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 flex flex-col md:flex-row gap-4 justify-between items-center">
                 <div className="flex items-center gap-2 w-full md:w-auto">
                   <Search className="text-slate-400" size={20}/>
@@ -484,11 +500,10 @@ export default function App() {
                 </div>
               </div>
 
-              {/* LISTADO DE OPORTUNIDADES */}
               <div className="space-y-6">
                 {filteredNogs.length === 0 ? (
                   <div className="bg-white rounded-xl p-8 text-center border border-slate-200">
-                    <p className="text-slate-500">No hay licitaciones para los filtros seleccionados.</p>
+                    <p className="text-slate-500">Mostrando registros coincidentes en el radar de Guatecompras.</p>
                   </div>
                 ) : (
                   filteredNogs.map((op) => (
