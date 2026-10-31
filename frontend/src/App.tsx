@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Target, Search, ArrowLeft, FileText, ChevronRight, BarChart3, AlertCircle, Building2, Cpu, LogOut, PieChart, TrendingUp, Zap, AlertTriangle, Eye, RefreshCw, Gavel, Users, Clock } from 'lucide-react';
+import { Target, CheckCircle, XCircle, Search, ArrowLeft, Trophy, FileText, ChevronRight, BarChart3, AlertCircle, Clock, Building2, Filter, Download, Cpu, ShieldCheck, Layers, LogOut, PieChart, TrendingUp, Sliders, Zap, AlertTriangle, Eye, RefreshCw, MessageSquare, Gavel, Users } from 'lucide-react';
 
 export default function App() {
   const [currentView, setCurrentView] = useState<'LANDING' | 'CHECKOUT' | 'LOGIN' | 'CLIENT' | 'SUPERADMIN' | 'DETAIL'>('LANDING');
@@ -133,6 +133,10 @@ export default function App() {
       }
     }, 1500);
   };
+
+  // 🚀 GENERACIÓN DINÁMICA DE ENTIDADES Y CATEGORÍAS ÚNICAS
+  const uniqueEntities = Array.from(new Set(nogs.map(nog => nog.buyer))).sort();
+  const uniqueCategories = Array.from(new Set(nogs.map(nog => nog.category))).sort();
 
   const filteredNogs = nogs.filter(op => {
     const matchesCategory = selectedCategory === 'TODAS' || op.category === selectedCategory;
@@ -432,18 +436,18 @@ export default function App() {
                     <label className="block text-xs font-bold text-slate-600 uppercase tracking-wide mb-2">1. Filtrar por Entidad Objetivo</label>
                     <select value={targetEntity} onChange={(e) => setTargetEntity(e.target.value)} className="w-full px-4 py-3 border rounded-xl bg-white text-sm font-medium outline-none focus:border-blue-600 shadow-sm">
                       <option value="TODAS">Mostrar Todas las Instituciones</option>
-                      <option value="MINISTERIO DE FINANZAS PÚBLICAS">MINISTERIO DE FINANZAS PÚBLICAS</option>
-                      <option value="MINISTERIO DE SALUD PÚBLICA Y ASISTENCIA SOCIAL">MINISTERIO DE SALUD</option>
-                      <option value="SUPERINTENDENCIA DE ADMINISTRACIÓN TRIBUTARIA (SAT)">SAT</option>
+                      {uniqueEntities.map(entity => (
+                        <option key={entity} value={entity}>{entity}</option>
+                      ))}
                     </select>
                   </div>
                   <div>
                     <label className="block text-xs font-bold text-slate-600 uppercase tracking-wide mb-2">2. Filtrar por Sector Comercial</label>
                     <select value={targetCategory} onChange={(e) => setTargetCategory(e.target.value)} className="w-full px-4 py-3 border rounded-xl bg-white text-sm font-medium outline-none focus:border-blue-600 shadow-sm">
                       <option value="TODAS">Todos los Sectores</option>
-                      <option value="Computación y telecomunicaciones">Computación y telecomunicaciones</option>
-                      <option value="Salud e insumos hospitalarios">Salud e insumos hospitalarios</option>
-                      <option value="Servicios Generales">Servicios Generales</option>
+                      {uniqueCategories.map(cat => (
+                        <option key={cat} value={cat}>{cat}</option>
+                      ))}
                     </select>
                   </div>
                 </div>
