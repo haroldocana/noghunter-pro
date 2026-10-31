@@ -3,8 +3,8 @@ import cors from 'cors';
 import mongoose from 'mongoose';
 import path from 'path';
 import authRoutes from './routes/authRoutes';
-// 1. Importamos las rutas de los inquilinos (tenants)
-import tenantRoutes from './routes/tenantRoutes';
+// 1. Importamos adminRoutes (este es el nombre correcto de tu archivo)
+import adminRoutes from './routes/adminRoutes';
 
 const app = express();
 
@@ -32,8 +32,8 @@ const connectDB = async () => {
 // ==========================================
 app.use('/api/auth', authRoutes);
 
-// 2. Montamos la ruta de inquilinos para que el Panel de SuperAdmin no de error 404
-app.use('/api/admin/tenants', tenantRoutes);
+// 2. Montamos la ruta de adminRoutes en /api/admin
+app.use('/api/admin', adminRoutes);
 
 app.get('/api/health', (req, res) => {
   res.json({ status: 'OK', timestamp: new Date() });
@@ -42,13 +42,10 @@ app.get('/api/health', (req, res) => {
 // ==========================================
 // 3. SERVIR EL FRONTEND (REACT/VITE)
 // ==========================================
-// process.cwd() apunta a la raíz del disco en Render (/opt/render/project/src)
 const frontendPath = path.join(process.cwd(), 'frontend', 'dist');
 
-// Le decimos a Express que sirva todos los archivos de esa carpeta (CSS, JS, Fuentes, Imágenes)
 app.use(express.static(frontendPath));
 
-// Cualquier ruta que no sea /api/... devolverá tu aplicación de React
 app.get('*', (req, res) => {
   res.sendFile(path.join(frontendPath, 'index.html'));
 });
