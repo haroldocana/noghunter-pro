@@ -80,4 +80,34 @@ router.post('/tenants/create', async (req, res) => {
   }
 });
 
+// ==========================================
+// 3. RESTABLECER CONTRASEÑA DE ADMINISTRADOR
+// ==========================================
+router.post('/tenants/:companyId/reset-password', async (req, res) => {
+  try {
+    const { companyId } = req.params;
+    const { newPassword } = req.body;
+
+    if (!newPassword || newPassword.length < 6) {
+      return res.status(400).json({ error: 'La contraseña debe tener al menos 6 caracteres.' });
+    }
+
+    // Buscamos al usuario administrador asociado a esta empresa
+    const user = await User.findOne({ companyId, role: 'ADMIN' });
+    if (!user) {
+      return res.status(404).json({ error: 'No se encontró un usuario administrador para esta empresa.' });
+    }
+
+    // Encriptamos la nueva contraseña con bcrypt
+    const salt = await bcrypt.genSalt(10);
+    user.passwordHash = await bcrypt.hash(newPassword, salt);
+    await user.save();
+
+    res.status(200).json({ message: 'Contraseña actualizada exitosamente' });
+  } catch (error) {
+    console.error('Error al restablecer la contraseña:', error);
+    res.status(500).json({ error: 'Error interno al actualizar la contraseña' });
+  }
+});
+
 export default router;
