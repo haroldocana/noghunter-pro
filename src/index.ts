@@ -3,6 +3,8 @@ import cors from 'cors';
 import mongoose from 'mongoose';
 import path from 'path';
 import authRoutes from './routes/authRoutes';
+// 1. Importamos las rutas de los inquilinos (tenants)
+import tenantRoutes from './routes/tenantRoutes';
 
 const app = express();
 
@@ -29,6 +31,9 @@ const connectDB = async () => {
 // 2. RUTAS DE LA API (BACKEND)
 // ==========================================
 app.use('/api/auth', authRoutes);
+
+// 2. Montamos la ruta de inquilinos para que el Panel de SuperAdmin no de error 404
+app.use('/api/admin/tenants', tenantRoutes);
 
 app.get('/api/health', (req, res) => {
   res.json({ status: 'OK', timestamp: new Date() });
