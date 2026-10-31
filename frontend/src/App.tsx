@@ -25,7 +25,8 @@ export default function App() {
     setIsLoading(true);
 
     try {
-      const response = await fetch('/api/auth/login', {
+      // Usamos la URL absoluta de Render para evitar fallos de enrutamiento estático
+      const response = await fetch('https://noghunter-pro-1.onrender.com/api/auth/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, password })
@@ -60,7 +61,7 @@ export default function App() {
     setSuccessMsg('');
 
     try {
-      const response = await fetch('/api/payments/webhook', {
+      const response = await fetch('https://noghunter-pro-1.onrender.com/api/payments/webhook', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -92,7 +93,7 @@ export default function App() {
   useEffect(() => {
     if (currentView === 'CLIENT') {
       setIsLoading(true);
-      fetch('/api/nogs')
+      fetch('https://noghunter-pro-1.onrender.com/api/nogs')
         .then((res) => res.json())
         .then((data) => {
           if (Array.isArray(data) && data.length > 0) {
@@ -112,7 +113,7 @@ export default function App() {
   // Carga dinámica de empresas (SUPERADMIN)
   useEffect(() => {
     if (currentView === 'SUPERADMIN') {
-      fetch('/api/admin/tenants')
+      fetch('https://noghunter-pro-1.onrender.com/api/admin/tenants')
         .then((res) => res.json())
         .then((data) => {
           if (Array.isArray(data)) {
@@ -128,7 +129,7 @@ export default function App() {
     setCreatingCompany(true);
 
     try {
-      const response = await fetch('/api/admin/tenants/create', {
+      const response = await fetch('https://noghunter-pro-1.onrender.com/api/admin/tenants/create', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(newCompanyForm)
@@ -506,7 +507,7 @@ export default function App() {
                         <div className="bg-blue-950/40 p-4 rounded-xl border border-blue-900/50 relative overflow-hidden">
                           {op.strategyIntelligence?.isRenewal && (
                              <div className="absolute top-0 right-0 bg-orange-500 text-white text-[10px] font-bold px-2 py-1 rounded-bl-lg">
-                               RENOVACIÓN DETECTADA
+                                RENOVACIÓN DETECTADA
                              </div>
                           )}
                           <h4 className="text-sm font-bold text-blue-300 mb-3 flex items-center gap-2">
