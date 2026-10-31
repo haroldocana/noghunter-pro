@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Target, CheckCircle, XCircle, Search, ArrowLeft, Trophy, FileText, ChevronRight, BarChart3, AlertCircle, Clock, Building2, Filter, Download, Cpu, ShieldCheck, Layers, LogOut, PieChart, TrendingUp, Sliders, Zap, AlertTriangle, Eye, RefreshCw, MessageSquare, Gavel, Users } from 'lucide-react';
+import { Target, Search, ArrowLeft, FileText, ChevronRight, BarChart3, AlertCircle, Building2, Cpu, LogOut, PieChart, TrendingUp, Zap, AlertTriangle, Eye, RefreshCw, Gavel, Users, Clock, CheckCircle } from 'lucide-react';
 
 export default function App() {
   const [currentView, setCurrentView] = useState<'LANDING' | 'CHECKOUT' | 'LOGIN' | 'CLIENT' | 'SUPERADMIN' | 'DETAIL'>('LANDING');
@@ -66,6 +66,7 @@ export default function App() {
     }
   }, [currentView]);
 
+  // 🚀 GENERADOR CON EXTRACCIÓN DE REQUISITOS HABILITANTES Y SUB-FILTROS EXACTOS
   const generar327AlertasMasivas = () => {
     const baseRealNogs = [
       { nog: "15412431", title: "CONTRATO ABIERTO NÚMERO 04-2021 ADQUISICIÓN DE MATERIAL MÉDICO", buyer: "MINISTERIO DE SALUD PÚBLICA Y ASISTENCIA SOCIAL (MSPAS)", procurementType: "CONTRATO ABIERTO", category: "Salud e insumos hospitalarios", product: "Material Médico", winner: "PharmaLatam S.A." },
@@ -77,10 +78,18 @@ export default function App() {
       { nog: "5085675", title: "ADQUISICIÓN DE REFACCIÓN MATUTINA", buyer: "MINISTERIO DE EDUCACIÓN (MINEDUC)", procurementType: "COTIZACIÓN", category: "Alimentos y semillas", product: "Alimentación Escolar", winner: "Alimentos del Istmo" }
     ];
 
+    const techSubFilters = ["Nube", "Licencias", "Ciberseguridad", "Hardware", "Enlaces"];
+    const techReqs = [["Partner Nivel Platinum", "Soporte 24/7 local"], ["ISO 27001 requerida", "Ingenieros certificados"], ["Garantía de 3 años", "SLA 99.9%"]];
+    const genReqs = [["3 Constancias de experiencia", "Patente vigente"], ["Muestras físicas", "Fianza 5%"]];
+
     const generated = [];
     for (let i = 0; i < 327; i++) {
       const realData = baseRealNogs[i % baseRealNogs.length];
       const simulatedNog = i < baseRealNogs.length ? realData.nog : (parseInt(realData.nog) + i * 15).toString();
+      
+      const isTech = realData.category === "Computación y telecomunicaciones";
+      const exactSpecialty = isTech ? techSubFilters[i % techSubFilters.length] : "General";
+      const detectedReqs = isTech ? techReqs[i % techReqs.length] : genReqs[i % genReqs.length];
 
       generated.push({
         id: simulatedNog,
@@ -90,7 +99,8 @@ export default function App() {
         procurementType: realData.procurementType,
         extractedProduct: realData.product,
         category: realData.category,
-        specialtyTag: realData.category === "Computación y telecomunicaciones" ? "Nube / Equipos" : "General",
+        specialtyTag: exactSpecialty,
+        detectedRequirements: detectedReqs,
         estimatedBudget: Math.floor(Math.random() * 900000) + 45000.00,
         matchScore: Math.floor(Math.random() * 60) + 40,
         closingTime: i % 3 === 0 ? "Cierra Hoy" : (i % 2 === 0 ? "Cierra Mañana" : "Más de 3 Días"),
@@ -105,10 +115,7 @@ export default function App() {
 
   const handleRunSimulation = (priceToBeat: number) => {
     const cost = parseFloat(ourCost);
-    if (!cost || isNaN(cost)) {
-      alert("Por favor ingresa un costo base válido.");
-      return;
-    }
+    if (!cost || isNaN(cost)) return alert("Por favor ingresa un costo base válido.");
     const suggestedBid = priceToBeat * 0.95; 
     const estimatedMargin = ((suggestedBid - cost) / suggestedBid) * 100;
     setSimulationResult({
@@ -125,7 +132,7 @@ export default function App() {
     setTimeout(() => {
       setIsAiProcessing(false);
       if (actionType === 'CRITERIOS') {
-        setAiAnalysisResult({ title: "⚖️ Análisis IA de Criterios de Calificación", content: "1. Precio (40%): El margen será determinante.\n2. Experiencia (30%): Exigen 3 constancias de proyectos similares.\n3. Soporte Local (30%): Gran ventaja comercial para tu equipo. ¡Enfoca la propuesta técnica aquí!" });
+        setAiAnalysisResult({ title: "⚖️ Análisis IA de Criterios de Calificación", content: "1. Precio (40%): El margen será determinante.\n2. Experiencia (30%): Exigen constancias de proyectos similares.\n3. Soporte Local (30%): Gran ventaja comercial para tu equipo. ¡Enfoca la propuesta técnica aquí!" });
       } else if (actionType === 'COMPETIDORES') {
         setAiAnalysisResult({ title: "📊 Predicción IA de Competidores", content: `• ${selectedNog?.strategyIntelligence?.previousWinner} (Alta probabilidad): Ganaron este contrato históricamente.\n• Soluciones Seguras (Media): Suelen ofertar en esta entidad.\n💡 Táctica de Venta: Atacar con el valor de certificaciones avanzadas y soporte 24/7 inmediato.` });
       } else if (actionType === 'BASES') {
@@ -134,7 +141,6 @@ export default function App() {
     }, 1500);
   };
 
-  // 🚀 GENERACIÓN DINÁMICA DE ENTIDADES Y CATEGORÍAS ÚNICAS
   const uniqueEntities = Array.from(new Set(nogs.map(nog => nog.buyer))).sort();
   const uniqueCategories = Array.from(new Set(nogs.map(nog => nog.category))).sort();
 
@@ -154,7 +160,7 @@ export default function App() {
           <button onClick={() => setCurrentView('LOGIN')} className="text-sm font-semibold text-slate-600">Iniciar Sesión</button>
         </header>
         <section className="max-w-5xl mx-auto text-center py-20 px-4">
-          <h1 className="text-5xl font-extrabold mb-6 leading-tight">Guatecompras por IA.<br/><span className="text-blue-600">Extrae, analiza y vende.</span></h1>
+          <h1 className="text-5xl font-extrabold mb-6 leading-tight">Guatecompras por IA.<br/><span className="text-blue-600">Extrae requisitos, analiza y vende.</span></h1>
           <button onClick={() => setCurrentView('LOGIN')} className="bg-blue-600 text-white font-bold py-4 px-8 rounded-xl">Ingresar al Sistema</button>
         </section>
       </div>
@@ -178,7 +184,7 @@ export default function App() {
   }
 
   // ==========================================
-  // VISTA 4.1: DETALLE RESTAURADO (SIMULADOR Y MATRIZ)
+  // VISTA 4.1: DETALLE (REQUISITOS, SIMULADOR, IA, RIESGO)
   // ==========================================
   if (currentView === 'DETAIL' && selectedNog) {
     return (
@@ -191,14 +197,26 @@ export default function App() {
         </nav>
 
         <main className="max-w-5xl mx-auto py-8 px-4 space-y-6">
-          
           <div className="bg-white rounded-2xl p-6 shadow-sm border border-slate-200">
             <div className="flex justify-between items-start">
-              <div>
+              <div className="flex-1 pr-6">
                 <span className="text-xs font-bold px-2 py-1 bg-indigo-50 text-indigo-700 rounded uppercase">{selectedNog.procurementType}</span>
+                <span className="text-xs font-bold px-2 py-1 bg-emerald-50 text-emerald-700 rounded uppercase ml-2">{selectedNog.specialtyTag}</span>
                 <h2 className="text-2xl font-black text-slate-900 mt-2">{selectedNog.title}</h2>
                 <p className="text-slate-600 font-medium flex items-center gap-2 mt-1"><Building2 size={16}/> {selectedNog.buyer}</p>
                 
+                {/* 🚀 REQUISITOS TÉCNICOS EXTRAÍDOS */}
+                <div className="mt-4 pt-4 border-t border-slate-100">
+                  <h4 className="text-xs font-bold text-slate-500 uppercase mb-2">Requisitos Técnicos Habilitantes (Extraídos por IA)</h4>
+                  <div className="flex flex-wrap gap-2">
+                    {selectedNog.detectedRequirements?.map((req: string, idx: number) => (
+                      <span key={idx} className="bg-slate-100 text-slate-700 px-3 py-1 rounded-lg text-xs font-bold flex items-center gap-1">
+                        <CheckCircle size={14} className="text-blue-500"/> {req}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+
                 {selectedNog.requiresOnSiteVisit && (
                   <div className="mt-4 bg-red-50 border border-red-200 p-4 rounded-xl flex items-center gap-3 text-red-800 text-sm font-bold shadow-sm">
                     <AlertTriangle size={24} className="text-red-600"/>
@@ -209,8 +227,8 @@ export default function App() {
                   </div>
                 )}
               </div>
-              <div className="text-right">
-                <span className="text-xs text-slate-400 font-bold uppercase">Presupuesto Estimado Institucional</span>
+              <div className="text-right border-l border-slate-100 pl-6">
+                <span className="text-xs text-slate-400 font-bold uppercase">Presupuesto Institucional</span>
                 <div className="text-3xl font-black text-emerald-600 mt-1">Q {selectedNog.estimatedBudget?.toLocaleString('es-GT', {minimumFractionDigits: 2})}</div>
               </div>
             </div>
@@ -243,7 +261,7 @@ export default function App() {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
               <button onClick={() => handleAIAction('BASES')} className="bg-slate-700 hover:bg-blue-600 border border-slate-600 hover:border-blue-500 p-4 rounded-xl flex flex-col items-center gap-2 transition-all">
                 <FileText size={24} className="text-amber-400"/>
-                <span className="text-sm font-bold text-center">Analizar Bases y Puntos Críticos</span>
+                <span className="text-sm font-bold text-center">Analizar Bases y Riesgos</span>
               </button>
               <button onClick={() => handleAIAction('CRITERIOS')} className="bg-slate-700 hover:bg-blue-600 border border-slate-600 hover:border-blue-500 p-4 rounded-xl flex flex-col items-center gap-2 transition-all">
                 <Gavel size={24} className="text-emerald-400"/>
@@ -542,6 +560,15 @@ export default function App() {
                       <div>
                         <h3 className="text-lg font-bold text-slate-900 leading-tight mb-1">{op.title}</h3>
                         <p className="text-sm font-medium text-slate-500 flex items-center gap-2"><Building2 size={16}/> {op.buyer}</p>
+                      </div>
+                      
+                      {/* 🚀 REQUISITOS EXTRAÍDOS EN LA TARJETA DEL RADAR */}
+                      <div className="flex flex-wrap gap-2 mt-2">
+                        {op.detectedRequirements?.map((req: string, idx: number) => (
+                          <span key={idx} className="bg-slate-100 text-slate-600 px-2 py-1 rounded text-[10px] font-bold flex items-center gap-1">
+                            <CheckCircle size={10} className="text-emerald-500"/> {req}
+                          </span>
+                        ))}
                       </div>
                     </div>
                     <div className="flex flex-col md:flex-row items-start md:items-center gap-4 w-full md:w-auto border-t md:border-t-0 border-slate-100 pt-4 md:pt-0">
