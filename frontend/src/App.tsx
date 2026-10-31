@@ -13,6 +13,9 @@ export default function App() {
   // Pestañas de la barra lateral profesional
   const [activeTab, setActiveTab] = useState<'DASHBOARD' | 'ALERTAS' | 'PRESUPUESTOS' | 'LABORATORIO'>('DASHBOARD');
   const [filterType, setFilterType] = useState('TODOS');
+  
+  // 🚀 NUEVO: Selector de categoría libre o dinámica elegida por el usuario
+  const [selectedCategory, setSelectedCategory] = useState('TODAS');
   const [searchTerm, setSearchTerm] = useState('');
 
   // Estados para el Simulador IA de Oferta
@@ -105,11 +108,11 @@ export default function App() {
         .then((res) => res.json())
         .then((data) => {
           if (Array.isArray(data) && data.length > 0) setNogs(data);
-          else cargarDatosRobustosMuestra();
+          else cargarDatosMulticategoriaMuestra();
           setIsLoading(false);
         })
         .catch(() => {
-          cargarDatosRobustosMuestra();
+          cargarDatosMulticategoriaMuestra();
           setIsLoading(false);
         });
     }
@@ -165,7 +168,8 @@ export default function App() {
     }
   };
 
-  const cargarDatosRobustosMuestra = () => {
+  // 🚀 DATOS DE MUESTRA AMPLIADOS A VARIAS CATEGORÍAS
+  const cargarDatosMulticategoriaMuestra = () => {
     setNogs([
       { 
         id: "9876543", 
@@ -177,74 +181,49 @@ export default function App() {
         category: "Tecnología y Cloud",
         estimatedBudget: 150000.00,
         matchScore: 92, 
-        closingTime: "Cierra Hoy",
-        institutionRisk: {
-          avgPaymentDays: "35 días",
-          revocationRate: "Bajo (1.2%)",
-          transparencyScore: "96 / 100"
-        },
+        institutionRisk: { avgPaymentDays: "35 días", revocationRate: "Bajo (1.2%)", transparencyScore: "96 / 100" },
         summary: ["Licenciamiento Google Workspace", "Protección perimetral avanzada", "Alta viabilidad para tus servicios"],
-        evaluationCriteria: [
-          { factor: "Oferta Económica (Precio)", weight: 40 },
-          { factor: "Tiempo de Entrega e Implementación", weight: 30 },
-          { factor: "Experiencia Acumulada y Certificaciones", weight: 30 }
-        ],
-        competitorsAnalysis: [
-          { name: "CiberSec S.A.", probability: "25%", strength: "Precio bajo en ofertas pasadas" },
-          { name: "Comptech (Tú)", probability: "68%", strength: "Partner oficial Google Cloud" },
-          { name: "TecnoCloud", probability: "7%", strength: "Sin certificaciones vigentes" }
-        ],
-        strategyIntelligence: {
-          isRenewal: true,
-          previousWinner: "CiberSec S.A.",
-          priceToBeat: 145500.00
-        },
-        riskClauses: [
-          "Multa de 0.5% por día de atraso (Verificar tiempos de entrega)",
-          "Exige garantía de sostenimiento de oferta del 5%"
-        ],
-        documents: [
-          { name: "Bases_Licitacion_9876543.pdf", size: "4.2 MB", type: "Bases Oficiales Guatecompras" },
-          { name: "Anexo_Tecnico_Requerimientos.pdf", size: "1.8 MB", type: "Especificaciones Técnicas IA" }
-        ]
+        evaluationCriteria: [{ factor: "Precio", weight: 40 }, { factor: "Experiencia", weight: 60 }],
+        competitorsAnalysis: [{ name: "CiberSec S.A.", probability: "25%", strength: "Precio bajo" }, { name: "Comptech (Tú)", probability: "68%", strength: "Partner oficial" }],
+        strategyIntelligence: { isRenewal: true, previousWinner: "CiberSec S.A.", priceToBeat: 145500.00 },
+        riskClauses: ["Multa de 0.5% por día de atraso"],
+        documents: [{ name: "Bases_9876543.pdf", size: "4.2 MB", type: "Bases Oficiales" }]
       },
       { 
         id: "4567891", 
         nog: "4567891", 
-        title: "Suministro de Enlaces Dedicados de Internet y Redes", 
-        buyer: "SUPERINTENDENCIA DE ADMINISTRACIÓN TRIBUTARIA (SAT)", 
+        title: "Suministro de Medicamentos e Insumos Hospitalarios", 
+        buyer: "MINISTERIO DE SALUD PÚBLICA", 
         procurementType: "COTIZACIÓN",
-        extractedProduct: "Fibra óptica y Enlaces IP",
-        category: "Telecomunicaciones",
-        estimatedBudget: 95000.00,
-        matchScore: 85, 
-        closingTime: "Cierra Mañana",
-        institutionRisk: {
-          avgPaymentDays: "20 días",
-          revocationRate: "Muy Bajo (0.5%)",
-          transparencyScore: "98 / 100"
-        },
-        summary: ["Conectividad redundante 1Gbps", "Soporte 24/7 garantizado", "Compatible con infraestructura actual"],
-        evaluationCriteria: [
-          { factor: "Ancho de Banda y Redundancia", weight: 50 },
-          { factor: "Costo Mensual Global", weight: 50 }
-        ],
-        competitorsAnalysis: [
-          { name: "Tigo Business", probability: "45%", strength: "Proveedor anterior" },
-          { name: "Claro Empresas", probability: "40%", strength: "Precio competitivo" },
-          { name: "Comptech / Alianza", probability: "15%", strength: "Especializado" }
-        ],
-        strategyIntelligence: {
-          isRenewal: false,
-          previousWinner: "Tigo Business",
-          priceToBeat: 89000.00
-        },
-        riskClauses: [
-          "No se aceptan consorcios sin experiencia previa en sector público"
-        ],
-        documents: [
-          { name: "Cotizacion_SAT_4567891.pdf", size: "2.1 MB", type: "Documento Base" }
-        ]
+        extractedProduct: "Antibióticos y Material Quirúrgico",
+        category: "Salud e Insumos Médicos",
+        estimatedBudget: 450000.00,
+        matchScore: 88, 
+        institutionRisk: { avgPaymentDays: "60 días", revocationRate: "Medio (3.5%)", transparencyScore: "88 / 100" },
+        summary: ["Suministro lote hospitalario", "Registro sanitario vigente requerido", "Entrega semestral"],
+        evaluationCriteria: [{ factor: "Costo", weight: 70 }, { factor: "Tiempo", weight: 30 }],
+        competitorsAnalysis: [{ name: "PharmaCorp", probability: "60%", strength: "Stock inmediato" }],
+        strategyIntelligence: { isRenewal: false, previousWinner: "PharmaCorp", priceToBeat: 420000.00 },
+        riskClauses: ["Garantía de cumplimiento del 20%"],
+        documents: [{ name: "Bases_Salud_4567891.pdf", size: "3.1 MB", type: "Bases Oficiales" }]
+      },
+      { 
+        id: "1122334", 
+        nog: "1122334", 
+        title: "Construcción de Muro Perimetral y Remozamiento Escolar", 
+        buyer: "MINISTERIO DE EDUCACIÓN", 
+        procurementType: "LICITACIÓN PÚBLICA",
+        extractedProduct: "Obra Gris y Albañilería",
+        category: "Construcción y Obra Grís",
+        estimatedBudget: 850000.00,
+        matchScore: 45, 
+        institutionRisk: { avgPaymentDays: "45 días", revocationRate: "Bajo (2.0%)", transparencyScore: "90 / 100" },
+        summary: ["Remozamiento de centro educativo", "Mano de obra y materiales incluidos"],
+        evaluationCriteria: [{ factor: "Precio", weight: 50 }, { factor: "Plazo", weight: 50 }],
+        competitorsAnalysis: [{ name: "Constructora Izabal", probability: "80%", strength: "Experiencia local" }],
+        strategyIntelligence: { isRenewal: false, previousWinner: "Constructora Izabal", priceToBeat: 800000.00 },
+        riskClauses: ["Fianza de anticipo obligatoria"],
+        documents: [{ name: "Planos_Mineduc.pdf", size: "12.5 MB", type: "Planos y Bases" }]
       }
     ]);
   };
@@ -255,7 +234,7 @@ export default function App() {
       alert("Por favor ingresa un costo base válido.");
       return;
     }
-    const suggestedBid = priceToBeat * 0.95; // 5% por debajo del precio a vencer
+    const suggestedBid = priceToBeat * 0.95; 
     const estimatedMargin = ((suggestedBid - cost) / suggestedBid) * 100;
     setSimulationResult({
       suggestedBid: suggestedBid.toFixed(2),
@@ -265,7 +244,9 @@ export default function App() {
     });
   };
 
+  // Filtrado robusto por categoría seleccionada, tipo y búsqueda abierta
   const filteredNogs = nogs.filter(op => {
+    const matchesCategory = selectedCategory === 'TODAS' || op.category === selectedCategory;
     const matchesType = filterType === 'TODOS' || op.procurementType === filterType;
     const matchesSearch = searchTerm === '' || 
       op.title.toLowerCase().includes(searchTerm.toLowerCase()) || 
@@ -273,12 +254,9 @@ export default function App() {
       op.extractedProduct.toLowerCase().includes(searchTerm.toLowerCase()) ||
       op.category.toLowerCase().includes(searchTerm.toLowerCase()) ||
       op.buyer.toLowerCase().includes(searchTerm.toLowerCase());
-    return matchesType && matchesSearch;
+    return matchesCategory && matchesType && matchesSearch;
   });
 
-  // ==========================================
-  // VISTAS PÚBLICAS
-  // ==========================================
   if (currentView === 'LANDING') {
     return (
       <div className="min-h-screen bg-white font-sans text-slate-900">
@@ -290,9 +268,9 @@ export default function App() {
         </header>
         <section className="max-w-5xl mx-auto text-center py-20 px-4">
           <h1 className="text-5xl font-extrabold tracking-tight mb-6 leading-tight">
-            Guatecompras, sin reglas manuales.<br/><span className="text-blue-600">Simulador IA de Ofertas y Prospección de Presupuestos.</span>
+            Guatecompras en cualquier categoría.<br/><span className="text-blue-600">Elige tu sector y deja que la IA rastree las oportunidades.</span>
           </h1>
-          <p className="text-xl text-slate-500 mb-10 max-w-2xl mx-auto">La plataforma definitiva para superar a la competencia en contrataciones públicas con Inteligencia Artificial.</p>
+          <p className="text-xl text-slate-500 mb-10 max-w-2xl mx-auto">Tecnología, salud, construcción, suministros y más. Inteligencia artificial aplicada a tus licitaciones objetivo.</p>
           <button onClick={() => setCurrentView('CHECKOUT')} className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 px-8 rounded-xl shadow-lg text-lg">Adquirir Licencia Q12,500 / año</button>
         </section>
       </div>
@@ -363,9 +341,6 @@ export default function App() {
     );
   }
 
-  // ==========================================
-  // VISTA 4.1: DETALLE, BASES, SIMULADOR Y RIESGO
-  // ==========================================
   if (currentView === 'DETAIL' && selectedNog) {
     return (
       <div className="min-h-screen bg-slate-100 font-sans">
@@ -381,6 +356,7 @@ export default function App() {
                 <span className="text-xs font-bold px-2 py-1 bg-indigo-50 text-indigo-700 rounded uppercase">{selectedNog.procurementType}</span>
                 <h2 className="text-2xl font-black text-slate-900 mt-2">{selectedNog.title}</h2>
                 <p className="text-slate-600 font-medium flex items-center gap-2 mt-1"><Building2 size={16}/> {selectedNog.buyer}</p>
+                <span className="inline-block mt-2 bg-slate-100 text-slate-700 text-xs font-semibold px-2.5 py-1 rounded">Categoría: {selectedNog.category}</span>
               </div>
               <div className="text-right">
                 <span className="text-xs text-slate-400 font-bold uppercase">Presupuesto Estimado</span>
@@ -389,7 +365,6 @@ export default function App() {
             </div>
           </div>
 
-          {/* MATRIZ DE RIESGO Y REPUTACIÓN DE LA INSTITUCIÓN */}
           <div className="bg-amber-50 border border-amber-200 rounded-2xl p-6 shadow-sm">
             <h3 className="text-sm font-bold text-amber-800 uppercase tracking-wider mb-3 flex items-center gap-2">
               <AlertTriangle size={18} className="text-amber-600"/> Matriz de Riesgo y Reputación de la Entidad Compradora
@@ -400,7 +375,7 @@ export default function App() {
                 <div className="text-lg font-black text-slate-800 mt-0.5">{selectedNog.institutionRisk?.avgPaymentDays}</div>
               </div>
               <div className="bg-white p-3 rounded-xl border border-amber-100">
-                <span className="text-xs text-slate-500 font-bold uppercase">Índice de Revocatoria / Concurso Desierto</span>
+                <span className="text-xs text-slate-500 font-bold uppercase">Índice de Revocatoria</span>
                 <div className="text-lg font-black text-emerald-600 mt-0.5">{selectedNog.institutionRisk?.revocationRate}</div>
               </div>
               <div className="bg-white p-3 rounded-xl border border-amber-100">
@@ -410,18 +385,17 @@ export default function App() {
             </div>
           </div>
 
-          {/* SIMULADOR PREDICTIVO DE OFERTA GANADORA (IA GENERATOR) */}
           <div className="bg-gradient-to-br from-blue-900 to-slate-900 text-white rounded-2xl p-6 shadow-lg">
             <h3 className="text-lg font-bold mb-2 flex items-center gap-2"><Zap className="text-amber-400"/> Simulador Predictivo de Oferta Ganadora (IA)</h3>
-            <p className="text-sm text-slate-300 mb-6">Ingresa tu costo base estimado para que la IA calcule el precio óptimo y maximice tu margen de ganancia frente al precio a vencer (Q {selectedNog.strategyIntelligence?.priceToBeat?.toLocaleString()}).</p>
+            <p className="text-sm text-slate-300 mb-6">Ingresa tu costo base para calcular el precio óptimo frente al precio a vencer (Q {selectedNog.strategyIntelligence?.priceToBeat?.toLocaleString()}).</p>
             
             <div className="flex flex-col md:flex-row gap-4 items-center mb-6">
               <div className="w-full md:flex-1">
-                <label className="block text-xs font-bold text-slate-300 uppercase mb-1">Costo Base / Inversión Interna (Q)</label>
+                <label className="block text-xs font-bold text-slate-300 uppercase mb-1">Costo Base (Q)</label>
                 <input type="number" value={ourCost} onChange={(e) => setOurCost(e.target.value)} placeholder="Ej. 110000" className="w-full px-4 py-2.5 rounded-xl bg-slate-800 border border-slate-700 text-white outline-none focus:border-blue-500" />
               </div>
-              <button onClick={() => handleRunSimulation(selectedNog.strategyIntelligence?.priceToBeat)} className="w-full md:w-auto bg-blue-600 hover:bg-blue-700 text-white font-bold px-6 py-3 rounded-xl transition-all self-end shadow-md">
-                Simular Propuesta Ganadora
+              <button onClick={() => handleRunSimulation(selectedNog.strategyIntelligence?.priceToBeat)} className="w-full md:w-auto bg-blue-600 hover:bg-blue-700 text-white font-bold px-6 py-3 rounded-xl transition-all self-end">
+                Simular Propuesta
               </button>
             </div>
 
@@ -432,42 +406,8 @@ export default function App() {
                   <div><span className="text-xs text-slate-400 uppercase">Margen Estimado</span><div className="text-2xl font-black text-blue-400">{simulationResult.estimatedMargin}%</div></div>
                   <div><span className="text-xs text-slate-400 uppercase">Probabilidad de Éxito</span><div className="text-2xl font-black text-amber-400">{simulationResult.winProbability}</div></div>
                 </div>
-                <p className="text-xs text-slate-300 italic pt-2 border-t border-slate-700">💡 Recomendación IA: {simulationResult.recommendation}</p>
               </div>
             )}
-          </div>
-
-          {/* BASES PUBLICADAS Y CLAÚSULAS DE RIESGO */}
-          <div className="bg-white rounded-2xl p-6 shadow-sm border border-slate-200">
-            <h3 className="text-sm font-bold text-slate-700 uppercase tracking-wider mb-4 flex items-center gap-2">
-              <FileText size={18} className="text-blue-600"/> Bases Publicadas y Alertas de Cláusulas Trampa
-            </h3>
-            
-            {selectedNog.riskClauses && selectedNog.riskClauses.length > 0 && (
-              <div className="bg-red-50 border border-red-200 p-4 rounded-xl mb-6 space-y-1">
-                <span className="text-xs font-bold text-red-700 uppercase">⚠️ Requisitos Excluyentes / Advertencias detectadas por IA:</span>
-                {selectedNog.riskClauses.map((clause: string, i: number) => (
-                  <p key={i} className="text-xs text-red-600 font-medium">• {clause}</p>
-                ))}
-              </div>
-            )}
-
-            <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3">Documentos Oficiales Descargables</h4>
-            {selectedNog.documents?.map((doc: any, idx: number) => (
-              <div key={idx} className="flex justify-between items-center bg-slate-50 p-4 rounded-xl border border-slate-200 mb-2">
-                <div className="flex items-center gap-3">
-                  <FileText className="text-blue-600" size={20}/>
-                  <div><h5 className="font-bold text-slate-800 text-sm">{doc.name}</h5><span className="text-xs text-slate-500">{doc.type}</span></div>
-                </div>
-                <button onClick={() => alert(`Descargando y proyectando bases de ${doc.name}...`)} className="bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold px-4 py-2 rounded-lg flex items-center gap-1"><Download size={14}/> Descargar Bases</button>
-              </div>
-            ))}
-
-            <div className="mt-6 pt-6 border-t border-slate-100 flex justify-end">
-              <button onClick={() => alert('¡Solicitud de participación registrada y enviada al CRM!')} className="bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-bold px-6 py-3 rounded-xl shadow-md flex items-center gap-2">
-                <CheckCircle size={18}/> Solicitar Participar en el Evento
-              </button>
-            </div>
           </div>
         </main>
       </div>
@@ -475,16 +415,16 @@ export default function App() {
   }
 
   // ==========================================
-  // VISTA 4: PANEL CLIENTE CON TODO INCLUIDO
+  // VISTA 4: PANEL CLIENTE CON SELECTOR DE CATEGORÍA
   // ==========================================
   return (
     <div className="min-h-screen bg-slate-100 font-sans flex">
       
-      {/* BARRA LATERAL */}
+      {/* BARRA LATERAL NOGHUNTER PRO */}
       <aside className="w-64 bg-slate-900 text-slate-300 flex flex-col justify-between hidden md:flex sticky top-0 h-screen">
         <div>
           <div className="p-6 border-b border-slate-800 flex items-center gap-2 text-white font-black text-xl tracking-tighter">
-            <Target className="text-blue-500"/> NOGRadar <span className="text-xs bg-blue-600 text-white px-1.5 py-0.5 rounded">PRO</span>
+            <Target className="text-blue-500"/> NOGHunter <span className="text-xs bg-blue-600 text-white px-1.5 py-0.5 rounded">PRO</span>
           </div>
           <nav className="p-4 space-y-2 text-sm font-medium">
             <button onClick={() => setActiveTab('DASHBOARD')} className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all ${activeTab === 'DASHBOARD' ? 'bg-blue-600 text-white shadow-lg' : 'hover:bg-slate-800 text-slate-400'}`}>
@@ -509,7 +449,7 @@ export default function App() {
       {/* CONTENIDO PRINCIPAL */}
       <div className="flex-1 flex flex-col min-w-0">
         <nav className="bg-white border-b border-slate-200 px-6 py-4 flex justify-between items-center sticky top-0 z-10 shadow-sm">
-          <h1 className="text-lg font-bold text-slate-800">Centro de Inteligencia Comercial & Simulador IA</h1>
+          <h1 className="text-lg font-bold text-slate-800">Centro de Inteligencia Comercial & Selección Multicategoría</h1>
           <span className="text-sm font-bold text-emerald-600">Bolsón IA: 48,500 / 50,000 Tokens</span>
         </nav>
 
@@ -519,41 +459,33 @@ export default function App() {
             <div className="space-y-6">
               <div className="bg-white rounded-2xl p-6 shadow-sm border border-slate-200">
                 <h3 className="text-lg font-bold text-slate-800 mb-2 flex items-center gap-2"><TrendingUp className="text-blue-600"/> Proyección y Análisis de Presupuesto Público</h3>
-                <p className="text-sm text-slate-500 mb-6">Desglose histórico y estimado de inversión de las principales instituciones en tecnología, nube y ciberseguridad.</p>
-                
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                  <div className="bg-slate-50 p-5 rounded-xl border border-slate-200">
-                    <span className="text-xs font-bold text-slate-400 uppercase">Ministerio de Finanzas</span>
-                    <h4 className="text-2xl font-black text-slate-900 mt-1">Q 4.5 Millones</h4>
-                    <span className="text-xs text-emerald-600 font-bold">↑ 14% vs año anterior (Cloud & ERP)</span>
-                  </div>
-                  <div className="bg-slate-50 p-5 rounded-xl border border-slate-200">
-                    <span className="text-xs font-bold text-slate-400 uppercase">SAT (Superintendencia)</span>
-                    <h4 className="text-2xl font-black text-slate-900 mt-1">Q 8.2 Millones</h4>
-                    <span className="text-xs text-emerald-600 font-bold">↑ 22% en Ciberseguridad y Enlaces</span>
-                  </div>
-                  <div className="bg-slate-50 p-5 rounded-xl border border-slate-200">
-                    <span className="text-xs font-bold text-slate-400 uppercase">Ministerio de Salud</span>
-                    <h4 className="text-2xl font-black text-slate-900 mt-1">Q 3.1 Millones</h4>
-                    <span className="text-xs text-slate-500 font-bold">Estable (Servicios generales y TI)</span>
-                  </div>
-                </div>
+                <p className="text-sm text-slate-500 mb-6">Desglose por categorías y sectores.</p>
               </div>
             </div>
           ) : (
             <div className="space-y-8">
-              <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                <div className="bg-white p-5 rounded-2xl shadow-sm border border-slate-200"><p className="text-xs font-bold text-slate-400 uppercase">Alertas Nuevas</p><h3 className="text-3xl font-black text-slate-900 mt-1">327</h3></div>
-                <div className="bg-white p-5 rounded-2xl shadow-sm border border-slate-200"><p className="text-xs font-bold text-slate-400 uppercase">Quiero Participar</p><h3 className="text-3xl font-black text-emerald-600 mt-1">16</h3></div>
-                <div className="bg-white p-5 rounded-2xl shadow-sm border border-slate-200"><p className="text-xs font-bold text-slate-400 uppercase">Eventos Seguidos</p><h3 className="text-3xl font-black text-slate-900 mt-1">42</h3></div>
-                <div className="bg-white p-5 rounded-2xl shadow-sm border border-slate-200"><p className="text-xs font-bold text-slate-400 uppercase">Productos Activos</p><h3 className="text-3xl font-black text-slate-900 mt-1">3</h3></div>
+              
+              {/* 🚀 SELECTOR DINÁMICO DE CATEGORÍAS */}
+              <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 space-y-3">
+                <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider">Filtrar por Categoría de Interés (Selecciona tu Sector)</label>
+                <div className="flex flex-wrap gap-2">
+                  {['TODAS', 'Tecnología y Cloud', 'Salud e Insumos Médicos', 'Construcción y Obra Grís', 'Telecomunicaciones', 'Servicios Generales'].map((cat) => (
+                    <button 
+                      key={cat} 
+                      onClick={() => setSelectedCategory(cat)} 
+                      className={`px-4 py-2 rounded-xl text-xs font-bold transition-all ${selectedCategory === cat ? 'bg-blue-600 text-white shadow-md' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'}`}
+                    >
+                      {cat}
+                    </button>
+                  ))}
+                </div>
               </div>
 
-              {/* BUSCADOR Y FILTROS */}
+              {/* BUSCADOR ABIERTO Y FILTROS DE TIPO */}
               <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 flex flex-col md:flex-row gap-4 justify-between items-center">
                 <div className="flex items-center gap-2 w-full md:w-auto">
                   <Search className="text-slate-400" size={20}/>
-                  <input type="text" placeholder="Buscar por NOG, producto o entidad..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} className="w-full md:w-96 px-4 py-2 border rounded-xl outline-none focus:border-blue-600 text-sm" />
+                  <input type="text" placeholder="Buscar por NOG, palabra clave o entidad..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} className="w-full md:w-96 px-4 py-2 border rounded-xl outline-none focus:border-blue-600 text-sm" />
                 </div>
                 <div className="flex flex-wrap gap-2 w-full md:w-auto">
                   {['TODOS', 'LICITACIÓN PÚBLICA', 'COTIZACIÓN', 'COMPRA DIRECTA'].map((type) => (
@@ -562,32 +494,38 @@ export default function App() {
                 </div>
               </div>
 
-              {/* LISTADO */}
+              {/* LISTADO DE OPORTUNIDADES FILTRADAS POR TU CATEGORÍA */}
               <div className="space-y-6">
-                {filteredNogs.map((op) => (
-                  <div key={op.id} className="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 flex flex-col md:flex-row gap-6 items-start hover:border-blue-300 transition-all">
-                    <div className="flex-1">
-                      <div className="flex items-center gap-3 mb-2 flex-wrap">
-                        <span className="bg-blue-100 text-blue-800 text-xs font-bold px-3 py-1 rounded-full">NOG: {op.nog}</span>
-                        <span className="bg-purple-50 text-purple-700 text-xs font-bold px-3 py-1 rounded-full border border-purple-200">{op.procurementType}</span>
-                        <span className="bg-slate-100 text-slate-700 text-xs font-semibold px-2.5 py-1 rounded-md">Producto IA: {op.extractedProduct}</span>
-                      </div>
-                      <h3 className="text-xl font-bold text-slate-800 mb-1">{op.title}</h3>
-                      <p className="text-slate-600 font-medium flex items-center gap-2 mb-4"><Building2 size={16}/> {op.buyer}</p>
-                      
-                      <button onClick={() => { setSelectedNog(op); setCurrentView('DETAIL'); }} className="bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold px-4 py-2.5 rounded-xl flex items-center gap-2 shadow-sm">
-                        Simular Oferta IA, Bases y Competencia <ChevronRight size={14}/>
-                      </button>
-                    </div>
-
-                    <div className="w-full md:w-48 flex flex-col gap-3">
-                      <div className="bg-slate-50 rounded-xl p-4 flex flex-col items-center justify-center border border-slate-100 text-center">
-                        <span className="text-xs font-bold text-slate-500 mb-1">Match Score</span>
-                        <div className="text-3xl font-black text-green-600 mb-1">{op.matchScore}%</div>
-                      </div>
-                    </div>
+                {filteredNogs.length === 0 ? (
+                  <div className="bg-white rounded-xl p-8 text-center border border-slate-200">
+                    <p className="text-slate-500">No hay licitaciones para esta categoría en este momento. La IA sigue escaneando Guatecompras.</p>
                   </div>
-                ))}
+                ) : (
+                  filteredNogs.map((op) => (
+                    <div key={op.id} className="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 flex flex-col md:flex-row gap-6 items-start hover:border-blue-300 transition-all">
+                      <div className="flex-1">
+                        <div className="flex items-center gap-3 mb-2 flex-wrap">
+                          <span className="bg-blue-100 text-blue-800 text-xs font-bold px-3 py-1 rounded-full">NOG: {op.nog}</span>
+                          <span className="bg-purple-50 text-purple-700 text-xs font-bold px-3 py-1 rounded-full border border-purple-200">{op.procurementType}</span>
+                          <span className="bg-emerald-50 text-emerald-700 text-xs font-bold px-3 py-1 rounded-full border border-emerald-200">{op.category}</span>
+                        </div>
+                        <h3 className="text-xl font-bold text-slate-800 mb-1">{op.title}</h3>
+                        <p className="text-slate-600 font-medium flex items-center gap-2 mb-4"><Building2 size={16}/> {op.buyer}</p>
+                        
+                        <button onClick={() => { setSelectedNog(op); setCurrentView('DETAIL'); }} className="bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold px-4 py-2.5 rounded-xl flex items-center gap-2 shadow-sm">
+                          Simular Oferta IA, Bases y Competencia <ChevronRight size={14}/>
+                        </button>
+                      </div>
+
+                      <div className="w-full md:w-48 flex flex-col gap-3">
+                        <div className="bg-slate-50 rounded-xl p-4 flex flex-col items-center justify-center border border-slate-100 text-center">
+                          <span className="text-xs font-bold text-slate-500 mb-1">Match Score</span>
+                          <div className="text-3xl font-black text-green-600 mb-1">{op.matchScore}%</div>
+                        </div>
+                      </div>
+                    </div>
+                  ))
+                )}
               </div>
             </div>
           )}
