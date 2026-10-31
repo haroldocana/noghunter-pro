@@ -1,20 +1,25 @@
 import React, { useState, useEffect } from 'react';
-import { Target, CheckCircle, XCircle, Search, ArrowLeft, Trophy, FileText, ChevronRight, BarChart3, AlertCircle, Clock, Building2 } from 'lucide-react';
+import { Target, CheckCircle, XCircle, Search, ArrowLeft, Trophy, FileText, ChevronRight, BarChart3, AlertCircle, Clock, Building2, Filter, Download, Cpu, ShieldCheck } from 'lucide-react';
 
 export default function App() {
-  const [currentView, setCurrentView] = useState<'LANDING' | 'CHECKOUT' | 'LOGIN' | 'CLIENT' | 'SUPERADMIN'>('LANDING');
+  const [currentView, setCurrentView] = useState<'LANDING' | 'CHECKOUT' | 'LOGIN' | 'CLIENT' | 'SUPERADMIN' | 'DETAIL'>('LANDING');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   
   const [nogs, setNogs] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [selectedNog, setSelectedNog] = useState<any>(null);
+
+  // Filtros avanzados
+  const [filterType, setFilterType] = useState('TODOS'); // Licitación, Cotización, Compra Directa
+  const [searchTerm, setSearchTerm] = useState('');
 
   const [formData, setFormData] = useState({ companyName: '', nit: '', adminName: '', adminEmail: '' });
   const [checkoutLoading, setCheckoutLoading] = useState(false);
   const [successMsg, setSuccessMsg] = useState('');
   const [errorMsg, setErrorMsg] = useState('');
 
-  // Estado para SuperAdmin y su modal de alta manual
+  // Estado para SuperAdmin
   const [companies, setCompanies] = useState<any[]>([]);
   const [showNewCompanyModal, setShowNewCompanyModal] = useState(false);
   const [newCompanyForm, setNewCompanyForm] = useState({ companyName: '', nit: '', adminName: '', adminEmail: '' });
@@ -23,10 +28,8 @@ export default function App() {
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
-
     const cleanEmail = email.trim().toLowerCase();
 
-    // 🚀 LLAVE MAESTRA FRONTAL: Entra al instante sin tocar el servidor
     if (cleanEmail === 'haroldocana@comptech.lat' && password === 'Admin123*') {
       setCurrentView('SUPERADMIN');
       setIsLoading(false);
@@ -39,15 +42,10 @@ export default function App() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email: cleanEmail, password })
       });
-
       const data = await response.json();
-
       if (response.ok) {
-        if (data.user.role === 'MASTER') {
-          setCurrentView('SUPERADMIN');
-        } else {
-          setCurrentView('CLIENT');
-        }
+        if (data.user.role === 'MASTER') setCurrentView('SUPERADMIN');
+        else setCurrentView('CLIENT');
       } else {
         alert(data.error || 'Credenciales inválidas'); 
       }
@@ -81,23 +79,21 @@ export default function App() {
           amount: 12500
         }),
       });
-
       const data = await response.json();
-
       if (response.ok) {
-        setSuccessMsg('¡Pago exitoso! El entorno de tu empresa ha sido creado. Revisa tu correo electrónico para obtener tus credenciales de acceso.');
+        setSuccessMsg('¡Pago exitoso! Revisa tu correo electrónico para obtener tus credenciales.');
         setFormData({ companyName: '', nit: '', adminName: '', adminEmail: '' });
       } else {
-        setErrorMsg(data.error || 'Ocurrió un error al procesar la compra.');
+        setErrorMsg(data.error || 'Error al procesar la compra.');
       }
     } catch (error) {
-      setErrorMsg('Error de conexión con el servidor. Intenta de nuevo.');
+      setErrorMsg('Error de conexión con el servidor.');
     } finally {
       setCheckoutLoading(false);
     }
   };
 
-  // Carga de oportunidades para los clientes
+  // Carga de oportunidades con datos extendidos (Tipos, Productos extraídos por IA)
   useEffect(() => {
     if (currentView === 'CLIENT') {
       setIsLoading(true);
@@ -107,46 +103,38 @@ export default function App() {
           if (Array.isArray(data) && data.length > 0) {
             setNogs(data);
           } else {
-            cargarDatosMuestra();
+            cargarDatosMuestraExtendidos();
           }
           setIsLoading(false);
         })
         .catch(() => {
-          cargarDatosMuestra();
+          cargarDatosMuestraExtendidos();
           setIsLoading(false);
         });
     }
   }, [currentView]);
 
-  // Carga dinámica de empresas (SUPERADMIN)
   useEffect(() => {
     if (currentView === 'SUPERADMIN') {
       fetch('/api/admin/tenants')
         .then((res) => res.json())
-        .then((data) => {
-          if (Array.isArray(data)) {
-            setCompanies(data);
-          }
-        })
-        .catch((err) => console.error('Error cargando las empresas:', err));
+        .then((data) => { if (Array.isArray(data)) setCompanies(data); })
+        .catch((err) => console.error('Error cargando empresas:', err));
     }
   }, [currentView]);
 
   const handleCreateCompanySubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setCreatingCompany(true);
-
     try {
       const response = await fetch('/api/admin/tenants/create', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(newCompanyForm)
       });
-
       const data = await response.json();
-
       if (response.ok) {
-        alert('¡Empresa creada con éxito! Se enviaron las credenciales por correo.');
+        alert('¡Empresa creada con éxito!');
         setShowNewCompanyModal(false);
         setNewCompanyForm({ companyName: '', nit: '', adminName: '', adminEmail: '' });
         window.location.reload(); 
@@ -154,66 +142,116 @@ export default function App() {
         alert(data.error || 'Error al crear la empresa');
       }
     } catch (error) {
-      alert('Error de conexión con el servidor');
+      alert('Error de conexión');
     } finally {
       setCreatingCompany(false);
     }
   };
 
   const handleGenerateCredentials = async (companyId: string) => {
-    const newPass = prompt("Ingresa la nueva contraseña temporal para el administrador de esta empresa:");
+    const newPass = prompt("Nueva contraseña temporal para el administrador:");
     if (!newPass) return;
-
     try {
       const response = await fetch(`/api/admin/tenants/${companyId}/reset-password`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ newPassword: newPass })
       });
-      const data = await response.json();
-      if (response.ok) {
-        alert('¡Contraseña actualizada exitosamente!');
-      } else {
-        alert(data.error || 'Error al actualizar credenciales');
-      }
+      if (response.ok) alert('¡Contraseña actualizada con éxito!');
+      else alert('Error al actualizar');
     } catch (err) {
-      alert('Error de conexión con el servidor');
+      alert('Error de conexión');
     }
   };
 
-  const cargarDatosMuestra = () => {
+  const cargarDatosMuestraExtendidos = () => {
     setNogs([
       { 
         id: "9876543", 
         nog: "9876543", 
         title: "Adquisición de Licencias en la Nube y Ciberseguridad", 
         buyer: "Ministerio de Finanzas Públicas", 
+        procurementType: "LICITACIÓN PÚBLICA",
+        extractedProduct: "Google Workspace & Firewall",
+        category: "Tecnología y Cloud",
         matchScore: 92, 
-        summary: ["Se requiere licenciamiento tipo Google Workspace", "Protección perimetral necesaria", "Alta viabilidad para tus servicios"],
+        summary: ["Licenciamiento Google Workspace", "Protección perimetral avanzada", "Alta viabilidad para tus servicios"],
         evaluationCriteria: [
           { factor: "Precio", weight: 40 },
           { factor: "Tiempo de Entrega", weight: 30 },
           { factor: "Experiencia Acumulada", weight: 30 }
         ],
+        competitorsAnalysis: [
+          { name: "CiberSec S.A.", probability: "25%", strength: "Precio bajo" },
+          { name: "Comptech (Tú)", probability: "68%", strength: "Soporte y partner oficial" },
+          { name: "TecnoCloud", probability: "7%", strength: "Sin certificaciones" }
+        ],
         strategyIntelligence: {
           isRenewal: true,
           previousWinner: "CiberSec S.A.",
           priceToBeat: 145500.00
-        }
+        },
+        documents: [
+          { name: "Bases_Licitacion_9876543.pdf", size: "4.2 MB", type: "Bases Oficiales Guatecompras" },
+          { name: "Anexo_Tecnico_Requerimientos.pdf", size: "1.8 MB", type: "Especificaciones Técnicas IA" }
+        ]
+      },
+      { 
+        id: "4567891", 
+        nog: "4567891", 
+        title: "Suministro de Enlaces Dedicados de Internet", 
+        buyer: "Superintendencia de Administración Tributaria (SAT)", 
+        procurementType: "COTIZACIÓN",
+        extractedProduct: "Fibra óptica y Enlaces IP",
+        category: "Telecomunicaciones",
+        matchScore: 85, 
+        summary: ["Conectividad redundante 1Gbps", "Soporte 24/7 garantizado", "Compatible con infraestructura actual"],
+        evaluationCriteria: [
+          { factor: "Ancho de Banda", weight: 50 },
+          { factor: "Costo Mensual", weight: 50 }
+        ],
+        competitorsAnalysis: [
+          { name: "Tigo Business", probability: "45%", strength: "Cobertura nacional" },
+          { name: "Claro Empresas", probability: "40%", strength: "Precio competitivo" },
+          { name: "Comptech / Alianza", probability: "15%", strength: "Especializado" }
+        ],
+        strategyIntelligence: {
+          isRenewal: false,
+          previousWinner: "Tigo Business",
+          priceToBeat: 89000.00
+        },
+        documents: [
+          { name: "Cotizacion_SAT_4567891.pdf", size: "2.1 MB", type: "Documento Base" }
+        ]
       },
       { 
         id: "1234567", 
         nog: "1234567", 
         title: "Servicios de Limpieza para Oficinas Centrales", 
         buyer: "Ministerio de Salud", 
+        procurementType: "COMPRA DIRECTA",
+        extractedProduct: "Conserjería y Limpieza",
+        category: "Servicios Generales",
         matchScore: 12, 
-        summary: ["Servicio de limpieza y conserjería", "No requiere tecnología ni nube", "Descartado automáticamente"] 
+        summary: ["Servicio de limpieza y conserjería", "No requiere tecnología ni nube", "Descartado automáticamente"],
+        documents: []
       }
     ]);
   };
 
+  // Filtrado dinámico por tipo y producto extraído por IA
+  const filteredNogs = nogs.filter(op => {
+    const matchesType = filterType === 'TODOS' || op.procurementType === filterType;
+    const matchesSearch = searchTerm === '' || 
+      op.title.toLowerCase().includes(searchTerm.toLowerCase()) || 
+      op.nog.includes(searchTerm) || 
+      op.extractedProduct.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      op.category.toLowerCase().includes(searchTerm.toLowerCase());
+    return matchesType && matchesSearch;
+  });
+
   // ==========================================
-  // VISTA 1: LANDING PAGE COMERCIAL
+  // VISTA 1: LANDING PAGE
   // ==========================================
   if (currentView === 'LANDING') {
     return (
@@ -227,51 +265,24 @@ export default function App() {
             Iniciar Sesión
           </button>
         </header>
-
         <section className="max-w-5xl mx-auto text-center py-20 px-4">
           <h1 className="text-5xl font-extrabold tracking-tight mb-6 leading-tight">
             Guatecompras, sin reglas manuales.<br/>
-            <span className="text-blue-600">Impulsado por Inteligencia Artificial.</span>
+            <span className="text-blue-600">Inteligencia Artificial aplicada a Licitaciones.</span>
           </h1>
           <p className="text-xl text-slate-500 mb-10 max-w-2xl mx-auto">
-            Olvida los laboriosos "laboratorios de reglas". NOGHunter Pro utiliza Gemini AI para leer bases de licitación y enviar los negocios pre-calificados directo a tu CRM.
+            Filtra por productos exactos, analiza bases de licitación en segundos y conoce tu probabilidad de éxito frente a la competencia.
           </p>
-        </section>
-
-        <section className="max-w-4xl mx-auto py-12 px-4 mb-20">
-          <div className="bg-slate-50 rounded-3xl p-8 md:p-12 flex flex-col md:flex-row items-center justify-between border border-slate-200 shadow-xl">
-            <div className="mb-8 md:mb-0">
-              <h2 className="text-3xl font-bold mb-2">Licencia Corporativa Anual</h2>
-              <ul className="space-y-3 mt-6 text-slate-700">
-                <li className="flex items-center gap-2"><CheckCircle className="text-emerald-500" size={20}/> <span className="font-semibold">5 Usuarios</span> incluidos por empresa</li>
-                <li className="flex items-center gap-2"><CheckCircle className="text-emerald-500" size={20}/> Bolsón anual de <span className="font-semibold">50,000 Tokens de IA</span></li>
-                <li className="flex items-center gap-2"><CheckCircle className="text-emerald-500" size={20}/> Integración API directa con tu CRM</li>
-                <li className="flex items-center gap-2"><CheckCircle className="text-emerald-500" size={20}/> Panel Anti-Fricción y resúmenes ejecutivos</li>
-              </ul>
-            </div>
-            <div className="bg-white p-8 rounded-2xl shadow-md border border-slate-100 text-center min-w-[300px]">
-              <div className="text-sm text-slate-500 font-semibold uppercase tracking-wider mb-2">Inversión</div>
-              <div className="text-4xl font-black text-slate-900 mb-1">Q12,500</div>
-              <div className="text-sm text-slate-400 mb-6">Facturación anual</div>
-              
-              <button 
-                onClick={() => setCurrentView('CHECKOUT')}
-                className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 rounded-xl shadow-lg transition-transform hover:scale-105"
-              >
-                Suscribirse y Pagar
-              </button>
-              <div className="mt-3 text-xs text-slate-400 flex items-center justify-center gap-1">
-                🔒 Pago seguro con tarjetas locales
-              </div>
-            </div>
-          </div>
+          <button onClick={() => setCurrentView('CHECKOUT')} className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 px-8 rounded-xl shadow-lg text-lg">
+            Adquirir Licencia Corporativa Q12,500 / año
+          </button>
         </section>
       </div>
     );
   }
 
   // ==========================================
-  // VISTA 1.5: CHECKOUT (COMPRA)
+  // VISTA 1.5: CHECKOUT
   // ==========================================
   if (currentView === 'CHECKOUT') {
     return (
@@ -279,42 +290,35 @@ export default function App() {
         <button onClick={() => setCurrentView('LANDING')} className="absolute top-6 left-6 text-sm text-slate-500 hover:text-slate-800 flex items-center gap-1">
           <ArrowLeft size={16}/> Volver
         </button>
-        
         <div className="max-w-md w-full bg-white rounded-2xl shadow-xl p-8 space-y-6 border border-slate-100">
-          <div className="text-center mb-6">
-            <h2 className="text-2xl font-bold text-slate-900">Finalizar Compra</h2>
-            <p className="text-slate-500 text-sm mt-1">Configura tu espacio corporativo de NOGHunter Pro.</p>
-          </div>
-
-          {successMsg && <div className="bg-green-50 border border-green-200 text-green-700 p-4 rounded-lg text-sm">{successMsg}</div>}
-          {errorMsg && <div className="bg-red-50 border border-red-200 text-red-700 p-4 rounded-lg text-sm">{errorMsg}</div>}
-
+          <h2 className="text-2xl font-bold text-slate-900 text-center">Finalizar Compra</h2>
+          {successMsg && <div className="bg-green-50 text-green-700 p-4 rounded-lg text-sm">{successMsg}</div>}
+          {errorMsg && <div className="bg-red-50 text-red-700 p-4 rounded-lg text-sm">{errorMsg}</div>}
           {!successMsg && (
             <form onSubmit={handleCheckoutSubmit} className="space-y-4">
               <div>
                 <label className="block text-sm font-medium text-slate-700 mb-1">Nombre de la Empresa</label>
                 <input type="text" name="companyName" value={formData.companyName} onChange={handleCheckoutChange} required
-                  className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-600 outline-none" placeholder="Ej. Servinformación" />
+                  className="w-full px-4 py-2 border rounded-lg outline-none focus:border-blue-600" placeholder="Ej. Comptech" />
               </div>
               <div>
                 <label className="block text-sm font-medium text-slate-700 mb-1">NIT</label>
                 <input type="text" name="nit" value={formData.nit} onChange={handleCheckoutChange} required
-                  className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-600 outline-none" placeholder="123456-7" />
+                  className="w-full px-4 py-2 border rounded-lg outline-none focus:border-blue-600" placeholder="3519971-7" />
               </div>
               <div>
                 <label className="block text-sm font-medium text-slate-700 mb-1">Nombre del Administrador</label>
                 <input type="text" name="adminName" value={formData.adminName} onChange={handleCheckoutChange} required
-                  className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-600 outline-none" placeholder="Ej. Juan Pérez" />
+                  className="w-full px-4 py-2 border rounded-lg outline-none focus:border-blue-600" placeholder="Ej. Harold Ocaña" />
               </div>
               <div>
                 <label className="block text-sm font-medium text-slate-700 mb-1">Correo Electrónico (Login)</label>
                 <input type="email" name="adminEmail" value={formData.adminEmail} onChange={handleCheckoutChange} required
-                  className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-600 outline-none" placeholder="juan@empresa.com" />
+                  className="w-full px-4 py-2 border rounded-lg outline-none focus:border-blue-600" placeholder="harold@comptech.lat" />
               </div>
-
               <button type="submit" disabled={checkoutLoading}
-                className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-lg transition-colors mt-4 disabled:opacity-50">
-                {checkoutLoading ? 'Procesando Pago y Creando Entorno...' : 'Pagar Q12,500 y Activar'}
+                className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-lg mt-4 disabled:opacity-50">
+                {checkoutLoading ? 'Procesando...' : 'Pagar Q12,500 y Activar'}
               </button>
             </form>
           )}
@@ -333,22 +337,17 @@ export default function App() {
           <ArrowLeft size={16}/> Volver al inicio
         </button>
         <div className="max-w-md w-full bg-white rounded-2xl shadow-xl p-8 space-y-6 border border-slate-100">
-          <div className="text-center">
-            <h1 className="text-3xl font-bold text-slate-900 tracking-tight flex justify-center items-center gap-2">
-              <Target className="text-blue-600"/> NOGHunter Pro
-            </h1>
-            <p className="text-slate-500 mt-2 text-sm">Acceso a plataforma</p>
-          </div>
+          <h1 className="text-3xl font-bold text-slate-900 text-center">NOGHunter Pro</h1>
           <form onSubmit={handleLogin} className="space-y-4">
             <div>
               <label className="block text-sm font-medium text-slate-700 mb-1">Correo Electrónico</label>
-              <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-600 outline-none" placeholder="usuario@empresa.com.gt" required />
+              <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} className="w-full px-4 py-2 border rounded-lg outline-none focus:border-blue-600" required />
             </div>
             <div>
               <label className="block text-sm font-medium text-slate-700 mb-1">Contraseña</label>
-              <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-600 outline-none" placeholder="••••••••" required />
+              <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} className="w-full px-4 py-2 border rounded-lg outline-none focus:border-blue-600" required />
             </div>
-            <button type="submit" disabled={isLoading} className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2.5 rounded-lg shadow-sm disabled:opacity-50">
+            <button type="submit" disabled={isLoading} className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2.5 rounded-lg shadow-sm">
               {isLoading ? 'Ingresando...' : 'Ingresar al Panel'}
             </button>
           </form>
@@ -364,20 +363,13 @@ export default function App() {
     return (
       <div className="min-h-screen bg-slate-900 text-slate-100">
         <nav className="bg-slate-800 border-b border-slate-700 px-6 py-4 flex justify-between items-center">
-          <h1 className="text-xl font-bold text-white flex items-center gap-2">
-            <Target className="text-blue-400"/> NOGHunter SuperAdmin
-          </h1>
+          <h1 className="text-xl font-bold text-white flex items-center gap-2"><Target className="text-blue-400"/> NOGHunter SuperAdmin</h1>
           <button onClick={() => setCurrentView('LANDING')} className="text-sm text-slate-400 hover:text-white">Cerrar Sesión</button>
         </nav>
         <main className="max-w-6xl mx-auto py-8 px-4">
           <div className="flex justify-between items-center mb-8">
             <h2 className="text-2xl font-bold">Gestión de Inquilinos (Tenants)</h2>
-            <button 
-              onClick={() => setShowNewCompanyModal(true)}
-              className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors"
-            >
-              + Nueva Empresa
-            </button>
+            <button onClick={() => setShowNewCompanyModal(true)} className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-medium">+ Nueva Empresa</button>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {companies.map(company => (
@@ -388,14 +380,9 @@ export default function App() {
                 </div>
                 <div className="space-y-3 mb-6 text-sm">
                   <div className="flex justify-between"><span className="text-slate-400">Usuarios:</span><span className="font-medium">{company.users} / 5 Max</span></div>
-                  <div className="flex justify-between"><span className="text-slate-400">Bolsón IA:</span><span className="text-emerald-400 font-medium">{company.aiUsed?.toLocaleString()} / {company.aiTotal?.toLocaleString()}</span></div>
+                  <div className="flex justify-between"><span className="text-slate-400">Bolsón IA:</span><span className="text-emerald-400 font-medium">{company.aiUsed} / {company.aiTotal}</span></div>
                 </div>
-                <button 
-                  onClick={() => handleGenerateCredentials(company.id || company._id)}
-                  className="w-full bg-slate-700 hover:bg-slate-600 text-white py-2 rounded text-sm font-medium transition-colors"
-                >
-                  Generar Credenciales
-                </button>
+                <button onClick={() => handleGenerateCredentials(company.id || company._id)} className="w-full bg-slate-700 hover:bg-slate-600 text-white py-2 rounded text-sm font-medium">Generar Credenciales</button>
               </div>
             ))}
           </div>
@@ -405,39 +392,13 @@ export default function App() {
               <div className="bg-slate-800 border border-slate-700 rounded-2xl max-w-md w-full p-6 relative">
                 <h3 className="text-xl font-bold text-white mb-4">Dar de alta nueva empresa</h3>
                 <form onSubmit={handleCreateCompanySubmit} className="space-y-4">
-                  <div>
-                    <label className="block text-xs font-semibold text-slate-400 mb-1 uppercase">Nombre de la Empresa</label>
-                    <input type="text" required value={newCompanyForm.companyName} 
-                      onChange={(e) => setNewCompanyForm({...newCompanyForm, companyName: e.target.value})}
-                      className="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-2 text-white outline-none focus:border-blue-500" placeholder="Ej. Soluciones Seguras" />
-                  </div>
-                  <div>
-                    <label className="block text-xs font-semibold text-slate-400 mb-1 uppercase">NIT</label>
-                    <input type="text" required value={newCompanyForm.nit} 
-                      onChange={(e) => setNewCompanyForm({...newCompanyForm, nit: e.target.value})}
-                      className="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-2 text-white outline-none focus:border-blue-500" placeholder="Ej. 883921-9" />
-                  </div>
-                  <div>
-                    <label className="block text-xs font-semibold text-slate-400 mb-1 uppercase">Nombre del Admin</label>
-                    <input type="text" required value={newCompanyForm.adminName} 
-                      onChange={(e) => setNewCompanyForm({...newCompanyForm, adminName: e.target.value})}
-                      className="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-2 text-white outline-none focus:border-blue-500" placeholder="Ej. Carlos Mendoza" />
-                  </div>
-                  <div>
-                    <label className="block text-xs font-semibold text-slate-400 mb-1 uppercase">Correo del Admin (Login)</label>
-                    <input type="email" required value={newCompanyForm.adminEmail} 
-                      onChange={(e) => setNewCompanyForm({...newCompanyForm, adminEmail: e.target.value})}
-                      className="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-2 text-white outline-none focus:border-blue-500" placeholder="carlos@empresa.com" />
-                  </div>
+                  <input type="text" required value={newCompanyForm.companyName} onChange={(e) => setNewCompanyForm({...newCompanyForm, companyName: e.target.value})} className="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-2 text-white" placeholder="Nombre de la Empresa" />
+                  <input type="text" required value={newCompanyForm.nit} onChange={(e) => setNewCompanyForm({...newCompanyForm, nit: e.target.value})} className="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-2 text-white" placeholder="NIT" />
+                  <input type="text" required value={newCompanyForm.adminName} onChange={(e) => setNewCompanyForm({...newCompanyForm, adminName: e.target.value})} className="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-2 text-white" placeholder="Nombre del Admin" />
+                  <input type="email" required value={newCompanyForm.adminEmail} onChange={(e) => setNewCompanyForm({...newCompanyForm, adminEmail: e.target.value})} className="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-2 text-white" placeholder="Correo del Admin" />
                   <div className="flex gap-3 pt-4">
-                    <button type="button" onClick={() => setShowNewCompanyModal(false)}
-                      className="flex-1 bg-slate-700 hover:bg-slate-600 text-white font-medium py-2 rounded-lg transition-colors">
-                      Cancelar
-                    </button>
-                    <button type="submit" disabled={creatingCompany}
-                      className="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 rounded-lg transition-colors disabled:opacity-50">
-                      {creatingCompany ? 'Creando...' : 'Guardar y Enviar'}
-                    </button>
+                    <button type="button" onClick={() => setShowNewCompanyModal(false)} className="flex-1 bg-slate-700 py-2 rounded-lg text-white">Cancelar</button>
+                    <button type="submit" disabled={creatingCompany} className="flex-1 bg-blue-600 py-2 rounded-lg text-white font-medium">Guardar y Enviar</button>
                   </div>
                 </form>
               </div>
@@ -449,16 +410,108 @@ export default function App() {
   }
 
   // ==========================================
-  // VISTA 4: PANEL CLIENTE (DASHBOARD ANALÍTICO PROFESIONAL)
+  // VISTA 4.1: DETALLE Y ANÁLISIS DE NOG / DOCUMENTOS
+  // ==========================================
+  if (currentView === 'DETAIL' && selectedNog) {
+    return (
+      <div className="min-h-screen bg-slate-100 font-sans">
+        <nav className="bg-white border-b border-slate-200 px-6 py-4 flex justify-between items-center sticky top-0 z-10 shadow-sm">
+          <button onClick={() => setCurrentView('CLIENT')} className="text-sm font-semibold text-slate-600 hover:text-blue-600 flex items-center gap-1">
+            <ArrowLeft size={16}/> Volver al Dashboard
+          </button>
+          <span className="bg-blue-100 text-blue-800 text-xs font-bold px-3 py-1 rounded-full">NOG: {selectedNog.nog}</span>
+        </nav>
+
+        <main className="max-w-5xl mx-auto py-8 px-4 space-y-6">
+          <div className="bg-white rounded-2xl p-6 shadow-sm border border-slate-200">
+            <div className="flex justify-between items-start">
+              <div>
+                <span className="text-xs font-bold px-2 py-1 bg-indigo-50 text-indigo-700 rounded uppercase">{selectedNog.procurementType}</span>
+                <h2 className="text-2xl font-black text-slate-900 mt-2">{selectedNog.title}</h2>
+                <p className="text-slate-600 font-medium flex items-center gap-2 mt-1"><Building2 size={16}/> {selectedNog.buyer}</p>
+              </div>
+              <div className="text-right">
+                <span className="text-xs text-slate-400 font-bold uppercase">Match Score IA</span>
+                <div className="text-3xl font-black text-emerald-600">{selectedNog.matchScore}%</div>
+              </div>
+            </div>
+          </div>
+
+          {/* DOCUMENTOS OFICIALES Y EXTRACCIÓN */}
+          <div className="bg-white rounded-2xl p-6 shadow-sm border border-slate-200">
+            <h3 className="text-sm font-bold text-slate-700 uppercase tracking-wider mb-4 flex items-center gap-2">
+              <FileText size={18} className="text-blue-600"/> Documentos Oficiales Extraídos (Guatecompras)
+            </h3>
+            {selectedNog.documents && selectedNog.documents.length > 0 ? (
+              <div className="space-y-3">
+                {selectedNog.documents.map((doc: any, index: number) => (
+                  <div key={index} className="flex justify-between items-center bg-slate-50 p-4 rounded-xl border border-slate-200">
+                    <div className="flex items-center gap-3">
+                      <FileText className="text-blue-600" size={24}/>
+                      <div>
+                        <h4 className="font-bold text-slate-800 text-sm">{doc.name}</h4>
+                        <span className="text-xs text-slate-500">{doc.type} • {doc.size}</span>
+                      </div>
+                    </div>
+                    <button onClick={() => alert(`Descargando y analizando ${doc.name} con Gemini AI...`)} className="bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold px-4 py-2 rounded-lg flex items-center gap-1 shadow-sm">
+                      <Download size={14}/> Analizar con IA
+                    </button>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <p className="text-sm text-slate-500">No hay documentos PDF adjuntos en esta oportunidad.</p>
+            )}
+          </div>
+
+          {/* ANÁLISIS DE COMPETIDORES Y PROBABILIDADES */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="bg-white rounded-2xl p-6 shadow-sm border border-slate-200">
+              <h3 className="text-sm font-bold text-slate-700 uppercase tracking-wider mb-4 flex items-center gap-2">
+                <Trophy size={18} className="text-amber-500"/> Análisis de Competidores y Probabilidad de Éxito
+              </h3>
+              {selectedNog.competitorsAnalysis ? (
+                <div className="space-y-3">
+                  {selectedNog.competitorsAnalysis.map((comp: any, idx: number) => (
+                    <div key={idx} className="bg-slate-50 p-3 rounded-xl border border-slate-100 flex justify-between items-center">
+                      <div>
+                        <span className="font-bold text-slate-800 text-sm">{comp.name}</span>
+                        <p className="text-xs text-slate-500">Fortaleza: {comp.strength}</p>
+                      </div>
+                      <span className="text-sm font-black text-blue-600 bg-blue-50 px-3 py-1 rounded-full">{comp.probability} prob.</span>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-sm text-slate-500">Sin datos históricos de competidores.</p>
+              )}
+            </div>
+
+            <div className="bg-slate-900 text-white rounded-2xl p-6 shadow-sm border border-slate-800">
+              <h3 className="text-sm font-bold text-blue-400 uppercase tracking-wider mb-3 flex items-center gap-2">
+                <ShieldCheck size={18}/> Estrategia de Cierre Recomendada
+              </h3>
+              <p className="text-sm text-slate-300 leading-relaxed">
+                Este proceso es una <span className="text-emerald-400 font-bold">{selectedNog.strategyIntelligence?.isRenewal ? 'Renovación detectada' : 'Nueva Adquisición'}</span>. 
+                El precio referencial a vencer es de <span className="text-emerald-400 font-black">Q {selectedNog.strategyIntelligence?.priceToBeat?.toLocaleString('es-GT', {minimumFractionDigits: 2})}</span>. 
+                Se recomienda enfocar la oferta en valor agregado y soporte local directo para superar al competidor anterior ({selectedNog.strategyIntelligence?.previousWinner}).
+              </p>
+            </div>
+          </div>
+        </main>
+      </div>
+    );
+  }
+
+  // ==========================================
+  // VISTA 4: PANEL CLIENTE / DASHBOARD COMERCIAL
   // ==========================================
   return (
     <div className="min-h-screen bg-slate-100 font-sans">
       <nav className="bg-white border-b border-slate-200 px-6 py-4 flex justify-between items-center sticky top-0 z-10 shadow-sm">
         <div className="flex items-center gap-4">
-          <h1 className="text-xl font-bold text-slate-800 flex items-center gap-2">
-            <Target className="text-blue-600"/> NOGHunter Pro
-          </h1>
-          <span className="bg-blue-50 text-blue-700 text-xs font-semibold px-2.5 py-1 rounded-full border border-blue-200">Empresa: QA Matching</span>
+          <h1 className="text-xl font-bold text-slate-800 flex items-center gap-2"><Target className="text-blue-600"/> NOGHunter Pro</h1>
+          <span className="bg-blue-50 text-blue-700 text-xs font-semibold px-3 py-1 rounded-full border border-blue-200">Comptech - Inteligencia Comercial</span>
         </div>
         <div className="flex items-center gap-6">
           <div className="flex flex-col text-right">
@@ -469,88 +522,72 @@ export default function App() {
         </div>
       </nav>
 
-      <main className="max-w-6xl mx-auto py-8 px-4">
+      <main className="max-w-6xl mx-auto py-8 px-4 space-y-8">
         
-        {/* PANEL DE ESTADÍSTICAS / KPIS SUPERIOR */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
+        {/* KPI CARDS */}
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
           <div className="bg-white p-5 rounded-2xl shadow-sm border border-slate-200 flex items-center justify-between">
             <div>
-              <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">Alertas Nuevas</p>
+              <p className="text-xs font-bold text-slate-400 uppercase">Alertas Nuevas</p>
               <h3 className="text-3xl font-black text-slate-900 mt-1">327</h3>
-              <span className="text-xs text-blue-600 font-medium">Sin clasificar</span>
+              <span className="text-xs text-blue-600 font-medium">Monitoreo activo</span>
             </div>
-            <div className="bg-blue-50 p-3 rounded-xl text-blue-600">
-              <AlertCircle size={24}/>
-            </div>
+            <div className="bg-blue-50 p-3 rounded-xl text-blue-600"><AlertCircle size={24}/></div>
           </div>
-
           <div className="bg-white p-5 rounded-2xl shadow-sm border border-slate-200 flex items-center justify-between">
             <div>
-              <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">Quiero Participar</p>
+              <p className="text-xs font-bold text-slate-400 uppercase">Quiero Participar</p>
               <h3 className="text-3xl font-black text-emerald-600 mt-1">16</h3>
               <span className="text-xs text-emerald-600 font-medium">Alta Viabilidad</span>
             </div>
-            <div className="bg-emerald-50 p-3 rounded-xl text-emerald-600">
-              <CheckCircle size={24}/>
-            </div>
+            <div className="bg-emerald-50 p-3 rounded-xl text-emerald-600"><CheckCircle size={24}/></div>
           </div>
-
           <div className="bg-white p-5 rounded-2xl shadow-sm border border-slate-200 flex items-center justify-between">
             <div>
-              <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">Eventos Seguidos</p>
+              <p className="text-xs font-bold text-slate-400 uppercase">Eventos Seguidos</p>
               <h3 className="text-3xl font-black text-slate-900 mt-1">42</h3>
               <span className="text-xs text-orange-500 font-medium">En seguimiento</span>
             </div>
-            <div className="bg-orange-50 p-3 rounded-xl text-orange-500">
-              <Trophy size={24}/>
-            </div>
+            <div className="bg-orange-50 p-3 rounded-xl text-orange-500"><Trophy size={24}/></div>
           </div>
-
           <div className="bg-white p-5 rounded-2xl shadow-sm border border-slate-200 flex items-center justify-between">
             <div>
-              <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">Productos Activos</p>
+              <p className="text-xs font-bold text-slate-400 uppercase">Productos Activos</p>
               <h3 className="text-3xl font-black text-slate-900 mt-1">3</h3>
-              <span className="text-xs text-slate-500 font-medium">Monitoreando</span>
+              <span className="text-xs text-slate-500 font-medium">Cloud & Seguridad</span>
             </div>
-            <div className="bg-slate-100 p-3 rounded-xl text-slate-600">
-              <BarChart3 size={24}/>
+            <div className="bg-slate-100 p-3 rounded-xl text-slate-600"><BarChart3 size={24}/></div>
+          </div>
+        </div>
+
+        {/* CONTROLES DE FILTRADO AVANZADO (TIPO Y PRODUCTO) */}
+        <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 space-y-4">
+          <div className="flex flex-col md:flex-row gap-4 justify-between items-center">
+            <div className="flex items-center gap-2 w-full md:w-auto">
+              <Search className="text-slate-400" size={20}/>
+              <input 
+                type="text" 
+                placeholder="Filtrar por NOG, producto extraído (ej. Google Workspace) o categoría..." 
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="w-full md:w-96 px-4 py-2 border rounded-xl outline-none focus:border-blue-600 text-sm"
+              />
+            </div>
+            <div className="flex flex-wrap gap-2 w-full md:w-auto">
+              {['TODOS', 'LICITACIÓN PÚBLICA', 'COTIZACIÓN', 'COMPRA DIRECTA'].map((type) => (
+                <button 
+                  key={type}
+                  onClick={() => setFilterType(type)}
+                  className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all ${filterType === type ? 'bg-blue-600 text-white shadow-sm' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'}`}
+                >
+                  {type}
+                </button>
+              ))}
             </div>
           </div>
         </div>
 
-        {/* CIERRE DE OPORTUNIDADES POR TIEMPO */}
-        <div className="bg-white rounded-2xl p-6 shadow-sm border border-slate-200 mb-8">
-          <h3 className="text-sm font-bold text-slate-700 uppercase tracking-wider mb-4 flex items-center gap-2">
-            <Clock size={18} className="text-blue-600"/> Cierre de Oportunidades / Eventos Coincidentes
-          </h3>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <div className="bg-red-50 border border-red-100 p-4 rounded-xl text-center">
-              <span className="text-xs font-bold text-red-600 uppercase">Cierran Hoy</span>
-              <div className="text-2xl font-black text-red-700 mt-1">16 <span className="text-xs font-normal">urgente</span></div>
-            </div>
-            <div className="bg-amber-50 border border-amber-100 p-4 rounded-xl text-center">
-              <span className="text-xs font-bold text-amber-600 uppercase">Cierran Mañana</span>
-              <div className="text-2xl font-black text-amber-700 mt-1">25 <span className="text-xs font-normal">prioridad</span></div>
-            </div>
-            <div className="bg-blue-50 border border-blue-100 p-4 rounded-xl text-center">
-              <span className="text-xs font-bold text-blue-600 uppercase">Pasado Mañana</span>
-              <div className="text-2xl font-black text-blue-700 mt-1">9 <span className="text-xs font-normal">en tiempo</span></div>
-            </div>
-            <div className="bg-slate-50 border border-slate-200 p-4 rounded-xl text-center">
-              <span className="text-xs font-bold text-slate-600 uppercase">Más de 3 Días</span>
-              <div className="text-2xl font-black text-slate-700 mt-1">268 <span className="text-xs font-normal">holgado</span></div>
-            </div>
-          </div>
-        </div>
-
-        {/* LISTADO DE OPORTUNIDADES PRE-CALIFICADAS */}
-        <div className="mb-6 flex justify-between items-end">
-          <div>
-            <h2 className="text-2xl font-bold text-slate-800">Oportunidades Pre-Calificadas por IA</h2>
-            <p className="text-slate-500 mt-1">Filtrado en tiempo real desde la base de datos de Guatecompras.</p>
-          </div>
-        </div>
-
+        {/* LISTADO DE OPORTUNIDADES FILTRADAS */}
         {isLoading ? (
           <div className="flex flex-col items-center justify-center py-12">
             <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-blue-600 mb-4"></div>
@@ -558,108 +595,55 @@ export default function App() {
           </div>
         ) : (
           <div className="space-y-6">
-            {nogs.length === 0 ? (
-              <div className="bg-white rounded-xl p-8 text-center border border-slate-200 shadow-sm">
-                <p className="text-slate-500">No hay licitaciones nuevas en este momento. El radar sigue monitoreando.</p>
+            {filteredNogs.length === 0 ? (
+              <div className="bg-white rounded-xl p-8 text-center border border-slate-200">
+                <p className="text-slate-500">No se encontraron oportunidades con los filtros seleccionados.</p>
               </div>
             ) : (
-              nogs.map((op) => (
-                <div key={op.id} className="bg-white rounded-xl shadow-sm border border-slate-200 p-6 flex flex-col md:flex-row gap-6 items-start">
-                  
-                  {/* Columna Izquierda: Información y Resumen */}
+              filteredNogs.map((op) => (
+                <div key={op.id} className="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 flex flex-col md:flex-row gap-6 items-start hover:border-blue-300 transition-all">
                   <div className="flex-1">
-                    <div className="flex items-center gap-3 mb-2">
-                      <span className="bg-blue-100 text-blue-800 text-xs font-bold px-3 py-1 rounded-full">
-                        NOG: {op.nog}
+                    <div className="flex items-center gap-3 mb-2 flex-wrap">
+                      <span className="bg-blue-100 text-blue-800 text-xs font-bold px-3 py-1 rounded-full">NOG: {op.nog}</span>
+                      <span className="bg-purple-50 text-purple-700 text-xs font-bold px-3 py-1 rounded-full border border-purple-200">{op.procurementType}</span>
+                      <span className="bg-slate-100 text-slate-700 text-xs font-semibold px-2.5 py-1 rounded-md flex items-center gap-1">
+                        <Cpu size={12} className="text-blue-600"/> Producto IA: {op.extractedProduct}
                       </span>
-                      <h3 className="text-xl font-bold text-slate-800">{op.title}</h3>
                     </div>
-                    <p className="text-slate-600 font-medium flex items-center gap-2 mb-4">
-                      <Building2 size={18}/> {op.buyer}
-                    </p>
+                    <h3 className="text-xl font-bold text-slate-800 mb-1">{op.title}</h3>
+                    <p className="text-slate-600 font-medium flex items-center gap-2 mb-4"><Building2 size={16}/> {op.buyer}</p>
                     
-                    <div className="bg-slate-50 p-4 rounded-lg border border-slate-100 mb-4">
-                      <h4 className="text-sm font-bold text-slate-700 mb-2 uppercase tracking-wide">Análisis de Gemini AI:</h4>
+                    <div className="bg-slate-50 p-4 rounded-xl border border-slate-100 mb-4">
+                      <h4 className="text-xs font-bold text-slate-700 mb-2 uppercase tracking-wide">Análisis de Requerimientos:</h4>
                       <ul className="space-y-1">
                         {op.summary && op.summary.map((bullet: string, i: number) => (
                           <li key={i} className="text-sm text-slate-600 flex items-start gap-2">
-                            <span className="text-blue-500 mt-0.5">•</span> {bullet}
+                            <span className="text-blue-500">•</span> {bullet}
                           </li>
                         ))}
                       </ul>
                     </div>
 
-                    {/* MÓDULO TÁCTICO DE CIERRE */}
-                    {op.evaluationCriteria && op.matchScore >= 70 && (
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        
-                        {/* Matriz de Calificación */}
-                        <div className="bg-slate-800 p-4 rounded-xl border border-slate-700">
-                          <h4 className="text-sm font-bold text-slate-300 mb-3 flex items-center gap-2">
-                            <FileText className="text-blue-400" size={16}/> Criterios de Evaluación
-                          </h4>
-                          <div className="space-y-2">
-                            {op.evaluationCriteria.map((crit: any, index: number) => (
-                              <div key={index} className="flex justify-between items-center text-sm border-b border-slate-700/50 pb-1 last:border-0 last:pb-0">
-                                <span className="text-slate-400">{crit.factor}</span>
-                                <span className="font-bold text-white bg-slate-700 px-2 py-0.5 rounded">{crit.weight}%</span>
-                              </div>
-                            ))}
-                          </div>
-                        </div>
-
-                        {/* Inteligencia Histórica */}
-                        <div className="bg-blue-950/40 p-4 rounded-xl border border-blue-900/50 relative overflow-hidden">
-                          {op.strategyIntelligence?.isRenewal && (
-                             <div className="absolute top-0 right-0 bg-orange-500 text-white text-[10px] font-bold px-2 py-1 rounded-bl-lg">
-                                RENOVACIÓN DETECTADA
-                             </div>
-                          )}
-                          <h4 className="text-sm font-bold text-blue-300 mb-3 flex items-center gap-2">
-                            <Trophy size={16}/> Estrategia de Cierre
-                          </h4>
-                          <div className="space-y-3">
-                            <div>
-                              <div className="text-[11px] text-slate-400 uppercase tracking-wider mb-0.5">Precio Máx a Vencer</div>
-                              <div className="text-xl font-black text-emerald-400">
-                                Q {op.strategyIntelligence?.priceToBeat?.toLocaleString('es-GT', {minimumFractionDigits: 2})}
-                              </div>
-                            </div>
-                            <div>
-                              <div className="text-[11px] text-slate-400 uppercase tracking-wider mb-0.5">Competidor a Vencer</div>
-                              <div className="text-sm font-bold text-slate-200 truncate">
-                                {op.strategyIntelligence?.previousWinner || 'Sin registro previo'}
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-
-                      </div>
-                    )}
+                    <button 
+                      onClick={() => { setSelectedNog(op); setCurrentView('DETAIL'); }}
+                      className="bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold px-4 py-2.5 rounded-xl flex items-center gap-2 transition-colors shadow-sm"
+                    >
+                      Ver NOG, Documentos y Competencia <ChevronRight size={14}/>
+                    </button>
                   </div>
 
-                  {/* Columna Derecha: Match Score */}
                   <div className="w-full md:w-48 flex flex-col gap-3">
                     <div className="bg-slate-50 rounded-xl p-4 flex flex-col items-center justify-center border border-slate-100 text-center flex-1">
-                      <span className="text-sm font-bold text-slate-500 mb-1">Match Score</span>
+                      <span className="text-xs font-bold text-slate-500 mb-1">Match Score</span>
                       <div className={`text-4xl font-black mb-2 ${op.matchScore >= 70 ? 'text-green-600' : 'text-red-500'}`}>
                         {op.matchScore}%
                       </div>
                       {op.matchScore >= 70 ? (
-                        <span className="flex items-center justify-center gap-1 text-xs font-bold text-green-700 bg-green-100 px-2 py-1 rounded w-full">
-                          <CheckCircle size={14}/> Alta Viabilidad
-                        </span>
+                        <span className="text-[11px] font-bold text-green-700 bg-green-100 px-2 py-1 rounded w-full">Alta Viabilidad</span>
                       ) : (
-                        <span className="flex items-center justify-center gap-1 text-xs font-bold text-red-700 bg-red-100 px-2 py-1 rounded w-full">
-                          <XCircle size={14}/> Descartado
-                        </span>
+                        <span className="text-[11px] font-bold text-red-700 bg-red-100 px-2 py-1 rounded w-full">Descartado</span>
                       )}
                     </div>
-                    {op.matchScore >= 70 && (
-                      <button className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-xl flex items-center justify-center gap-2 transition-colors">
-                        Enviar a CRM <ChevronRight size={16}/>
-                      </button>
-                    )}
                   </div>
                 </div>
               ))
