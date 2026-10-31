@@ -6,7 +6,7 @@ import User from '../models/User';
 const router = Router();
 
 // ==========================================
-// 1. OBTENER TODAS LAS EMPRESAS (Faltaba esto)
+// 1. OBTENER TODAS LAS EMPRESAS 
 // ==========================================
 router.get('/tenants', async (req, res) => {
   try {
