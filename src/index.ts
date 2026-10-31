@@ -39,11 +39,13 @@ app.get('/api/health', (req, res) => {
 // ==========================================
 // SERVIR EL FRONTEND ESTÁTICO EN PRODUCCIÓN
 // ==========================================
-// Apunta a la carpeta dist generada durante el build de tu frontend
-const frontendPath = path.join(__dirname, '../frontend/dist');
+// process.cwd() garantiza que busque siempre desde la raíz del repositorio en Render
+const frontendPath = path.join(process.cwd(), 'frontend', 'dist');
+
+// Servir los archivos estáticos generados por Vite
 app.use(express.static(frontendPath));
 
-// Cualquier otra ruta que no sea de la API devolverá el index.html de React
+// Cualquier otra ruta no capturada por la API devolverá el index.html de React (para que funcione el React Router)
 app.get('*', (req, res) => {
   res.sendFile(path.join(frontendPath, 'index.html'));
 });
