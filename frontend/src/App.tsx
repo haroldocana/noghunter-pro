@@ -152,31 +152,30 @@ export default function App() {
         unidadCompradora: randEntity.unidad,
         procurementType: randModalidad, 
         category: randCat,
-        // 🚀 EXTRACCIÓN DE FIANZAS EXACTAS
-        fianzaSostenimiento: randModalidad.includes("Baja Cuantía") || randModalidad.includes("Directa") ? "0.00%" : "2.00%",
-        fianzaCumplimiento: randModalidad.includes("Baja Cuantía") || randModalidad.includes("Directa") ? "0.00%" : "10.00%",
-        beneficiarioFianza: randEntity.entidad, 
+        // 🚀 EXTRACCIÓN FINANCIERA (Fianzas y Beneficiario)
+        fianzaSostenimiento: randModalidad.includes("Directa") ? "0.00%" : "2.00%",
+        fianzaCumplimiento: randModalidad.includes("Directa") ? "0.00%" : "10.00%",
+        beneficiarioFianza: randEntity.entidad, // A nombre de quién se emite
         specialtyTag: isTech ? "Tecnología" : "General",
-        detectedRequirements: ["Solvencia Fiscal", "Constancia RGAE", "Muestras Físicas", "Certificación Técnica ISO"],
+        // 🚀 EXTRACCIÓN TÉCNICA (Listado de Requisitos)
+        detectedRequirements: ["Solvencia Fiscal", "Constancia RGAE", "Fianza de Sostenimiento", "Muestras Técnicas", "Certificación ISO (Opcional)"],
         qualificationCriteria: [{ name: "Precio", weight: 60 }, { name: "Calidad Técnica", weight: 30 }, { name: "Tiempo de Entrega", weight: 10 }],
         estimatedBudget: previousPrice * 1.15,
         horasRestantes: horasRestantes,
         requiresOnSiteVisit: i % 3 === 0, 
-        onSiteVisitDetails: { date: "15/11/2026 09:00 AM", location: randEntity.unidad },
-        actionHistory: [{ action: "CREACIÓN", description: `Publicación inicial estructurada. NOG ${simulatedNog}.`, documents: [`Especificaciones_Tecnicas.pdf`, `Bases_Administrativas.docx`] }],
-        // 🚀 EXTRACCIÓN IA DE PRODUCTOS
+        onSiteVisitDetails: { date: "15/11/2026", location: randEntity.unidad },
+        actionHistory: [{ action: "CREACIÓN", description: `Publicación inicial. NOG ${simulatedNog}.`, documents: [`Especificaciones_Tecnicas.pdf`, `Bases_Administrativas.docx`] }],
+        // 🚀 ANÁLISIS IA DE PRODUCTO Y COMPETENCIA CRUZADA
         aiProductExtraction: {
-          tipo: isTech ? "Equipamiento de Redes/Servidores" : "Insumos e Inventario",
-          marcasAceptadas: isTech ? ["Dell", "HP", "Cisco", "Fortinet"] : ["Certificadas", "Nacionales"],
-          modeloBase: isTech ? "Especificaciones equivalentes a R740" : "Sujeto a muestras",
-          servicioIncluido: "Soporte Técnico Especializado 36 meses"
+          tipo: isTech ? "Hardware / Servidores" : "Insumos Varios",
+          marcasAceptadas: isTech ? ["Dell", "HP", "Cisco"] : ["Genérico", "Nacional"],
+          modeloBase: isTech ? "Equivalente a PowerEdge R740" : "No especificado",
+          servicioIncluido: "Soporte Técnico 36 meses 24/7"
         },
-        // 🚀 CRUCE DE COMPETITIVIDAD A 3 AÑOS
         historicalCompetition: { 
           hasHistory: true, previousWinner: "Competidor S.A.", 
-          similarityScore: Math.floor(Math.random() * 20) + 75, 
-          previousPrice: previousPrice, yearsAgo: Math.floor(Math.random()*3)+1,
-          previousNog: (parseInt(simulatedNog) - 120000).toString()
+          similarityScore: 82, // Rubros iguales arriba del 70%
+          previousPrice: previousPrice, yearsAgo: Math.floor(Math.random()*3)+1 
         }
       });
     }
@@ -199,7 +198,7 @@ export default function App() {
     if(!nogSearchInput) return;
     setIsAnalyzing(true);
     setAnalyzedNog(null);
-    setTokenPool(prev => prev - 25); 
+    setTokenPool(prev => prev - 25); // Consume tokens
     setTimeout(() => {
       const found = nogs.find(n => n.nog === nogSearchInput.trim()) || nogs[0];
       setAnalyzedNog(found);
@@ -224,7 +223,7 @@ export default function App() {
       <div className="min-h-screen bg-slate-900 text-white flex flex-col items-center justify-center p-4">
         <div className="relative flex items-center justify-center w-24 h-24 bg-blue-600 rounded-3xl shadow-[0_0_40px_rgba(37,99,235,0.5)] mb-8"><Brain size={48} strokeWidth={1.5}/></div>
         <h1 className="text-6xl font-black mb-4 tracking-tighter">NOG<span className="text-blue-500">Hunter</span> Pro</h1>
-        <p className="text-xl text-slate-400 mb-10 font-medium max-w-3xl text-center">Motor IA para extracción de bases, análisis de competencia y gestión operativa de las 30 modalidades de compra en Guatecompras.</p>
+        <p className="text-xl text-slate-400 mb-10 font-medium max-w-3xl text-center">Motor IA para extracción de bases, evaluación de competencia, y gestión operativa de las 30 modalidades de compra en Guatecompras.</p>
         <div className="flex gap-4">
           <button onClick={() => setCurrentView('LOGIN')} className="bg-slate-800 px-8 py-4 rounded-xl font-bold text-lg hover:bg-slate-700 transition-all border border-slate-700">Client Login</button>
           <button onClick={() => {setCheckoutMode('LICENSE'); setCurrentView('CHECKOUT');}} className="bg-blue-600 px-8 py-4 rounded-xl font-bold text-lg hover:bg-blue-500 transition-all shadow-lg shadow-blue-900/50">Adquirir Licencia B2B</button>
@@ -241,7 +240,7 @@ export default function App() {
           <div className="text-center mb-6">
             <h2 className="text-3xl font-black text-slate-900">{checkoutMode === 'LICENSE' ? 'Suscripción Tenant' : 'Recarga de Tokens IA'}</h2>
             <div className="text-4xl font-black text-blue-600 mt-2">{checkoutMode === 'LICENSE' ? 'Q 12,500' : 'Q 1,500'} <span className="text-sm text-slate-400 font-medium">{checkoutMode === 'LICENSE' ? '/ año' : '/ 50k Tokens'}</span></div>
-            <p className="text-xs text-slate-500 mt-2">{checkoutMode === 'LICENSE' ? 'Licencia Master, usuarios configurables y 50,000 tokens iniciales.' : 'Bolsón adicional para análisis profundo de competencia y extracción DOCX.'}</p>
+            <p className="text-xs text-slate-500 mt-2">{checkoutMode === 'LICENSE' ? 'Licencia Master, usuarios configurables y 50,000 tokens iniciales.' : 'Bolsón adicional para análisis profundo y extracción DOCX.'}</p>
           </div>
           {successMsg ? (
             <div className="bg-emerald-50 text-emerald-800 p-4 rounded-xl border border-emerald-200 text-center font-bold text-sm"><CheckCircle className="inline mb-1" size={24}/><br/>{successMsg}</div>
@@ -249,7 +248,7 @@ export default function App() {
             <form onSubmit={handleCheckoutSubmit} className="space-y-4">
               <input type="text" className="w-full px-4 py-3 border rounded-xl bg-slate-50" placeholder="Razón Social / Empresa" required />
               <input type="text" className="w-full px-4 py-3 border rounded-xl bg-slate-50" placeholder="NIT" required />
-              <input type="email" className="w-full px-4 py-3 border rounded-xl bg-slate-50" placeholder="Correo Master (Recepción de Acceso)" required />
+              <input type="email" className="w-full px-4 py-3 border rounded-xl bg-slate-50" placeholder="Correo Master (Recepción de Accessos)" required />
               <div className="border-t border-slate-100 pt-4 mt-2">
                 <div className="flex items-center gap-2 text-slate-500 text-sm mb-2"><CreditCard size={16}/> Pasarela de Pago Segura</div>
                 <input type="text" className="w-full px-4 py-3 border rounded-xl bg-slate-50 mb-2" placeholder="Número de Tarjeta" required />
@@ -276,7 +275,7 @@ export default function App() {
           <form onSubmit={handleLogin} className="space-y-4">
             <input type="email" value={email} onChange={e => setEmail(e.target.value)} className="w-full px-4 py-3 border rounded-xl bg-slate-50" placeholder="Usuario / Correo Administrativo" required />
             <input type="password" value={password} onChange={e => setPassword(e.target.value)} className="w-full px-4 py-3 border rounded-xl bg-slate-50" placeholder="Contraseña Segura" required />
-            <button type="submit" disabled={isLoading} className="w-full bg-slate-900 hover:bg-slate-800 text-white font-bold py-4 rounded-xl shadow-md transition-all">Autenticar Panel</button>
+            <button type="submit" disabled={isLoading} className="w-full bg-slate-900 hover:bg-slate-800 text-white font-bold py-4 rounded-xl shadow-md transition-all">Autenticar Sistema</button>
           </form>
         </div>
       </div>
@@ -284,7 +283,7 @@ export default function App() {
   }
 
   // ==========================================
-  // VISTA SUPERADMIN (GESTIÓN DE LICENCIAS Y USUARIOS)
+  // VISTA SUPERADMIN: GESTIÓN DE TENANTS Y PASARELA
   // ==========================================
   if (currentView === 'SUPERADMIN') {
     return (
@@ -323,7 +322,7 @@ export default function App() {
               <tbody>
                 {tenants.map(t => (
                   <tr key={t.id} className="border-b border-slate-100 last:border-0 hover:bg-slate-50">
-                    <td className="p-4 font-bold text-slate-800">{t.name} <span className="block text-xs text-slate-400 font-normal">NIT: {t.nit} | {t.activeUsers} Usuarios</span></td>
+                    <td className="p-4 font-bold text-slate-800">{t.name} <span className="block text-xs text-slate-400 font-normal">NIT: {t.nit || 'C/F'} | {t.activeUsers} Usuarios</span></td>
                     <td className="p-4 text-xs font-mono text-slate-500">{t.gatewayId}</td>
                     <td className="p-4 text-sm text-blue-600 font-medium">{t.adminEmail}</td>
                     <td className="p-4 text-sm font-bold text-slate-700">{t.expires}</td>
@@ -343,7 +342,7 @@ export default function App() {
   }
 
   // ==========================================
-  // VISTA CLIENTE: APLICACIÓN PRINCIPAL B2B
+  // VISTA CLIENTE: APLICACIÓN PRINCIPAL
   // ==========================================
   return (
     <div className="min-h-screen bg-slate-100 font-sans flex">
@@ -356,9 +355,9 @@ export default function App() {
           <nav className="p-4 space-y-1.5 text-sm font-medium">
             <button onClick={() => {setActiveTab('DASHBOARD'); setAnalyzedNog(null);}} className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all ${activeTab === 'DASHBOARD' ? 'bg-blue-600 text-white shadow-lg' : 'hover:bg-slate-800'}`}><BarChart3 size={18}/> BI Dashboard</button>
             <button onClick={() => {setActiveTab('ANALIZADOR'); setAnalyzedNog(null);}} className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all ${(activeTab === 'ANALIZADOR' && !analyzedNog) ? 'bg-blue-600 text-white shadow-lg' : 'hover:bg-slate-800'}`}><Fingerprint size={18}/> Analizador Profundo NOG</button>
-            <button onClick={() => {setActiveTab('ALERTAS'); setAnalyzedNog(null);}} className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all ${activeTab === 'ALERTAS' ? 'bg-blue-600 text-white shadow-lg' : 'hover:bg-slate-800'}`}><Target size={18}/> Buscador (30 Mod.)</button>
-            <button onClick={() => {setActiveTab('WORKSPACE'); setAnalyzedNog(null);}} className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all ${activeTab === 'WORKSPACE' ? 'bg-blue-600 text-white shadow-lg' : 'hover:bg-slate-800'}`}><Briefcase size={18}/> Workspace de Operación</button>
-            <button onClick={() => {setActiveTab('LABORATORIO'); setAnalyzedNog(null);}} className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all ${activeTab === 'LABORATORIO' ? 'bg-blue-600 text-white shadow-lg' : 'hover:bg-slate-800'}`}><Cpu size={18}/> Categorías Propias</button>
+            <button onClick={() => {setActiveTab('ALERTAS'); setAnalyzedNog(null);}} className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all ${activeTab === 'ALERTAS' ? 'bg-blue-600 text-white shadow-lg' : 'hover:bg-slate-800'}`}><Target size={18}/> Motor de Búsqueda (30 Mod.)</button>
+            <button onClick={() => {setActiveTab('WORKSPACE'); setAnalyzedNog(null);}} className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all ${activeTab === 'WORKSPACE' ? 'bg-blue-600 text-white shadow-lg' : 'hover:bg-slate-800'}`}><Briefcase size={18}/> Operar Licitación (Workspace)</button>
+            <button onClick={() => {setActiveTab('LABORATORIO'); setAnalyzedNog(null);}} className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all ${activeTab === 'LABORATORIO' ? 'bg-blue-600 text-white shadow-lg' : 'hover:bg-slate-800'}`}><Cpu size={18}/> Algoritmos y Categorías</button>
           </nav>
         </div>
         <div className="p-4 border-t border-slate-800 space-y-4">
@@ -375,8 +374,8 @@ export default function App() {
 
       <div className="flex-1 flex flex-col min-w-0">
         <nav className="bg-white border-b border-slate-200 px-8 py-5 flex justify-between items-center sticky top-0 z-10 shadow-sm">
-          <h1 className="text-xl font-bold text-slate-800">{analyzedNog ? `Dossier NOG: ${analyzedNog.nog}` : 'Centro de Inteligencia Comercial B2B'}</h1>
-          <span className="text-xs font-black text-emerald-700 bg-emerald-50 px-4 py-1.5 rounded-full border border-emerald-200 flex items-center gap-2"><div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></div> En Vivo: Guatecompras</span>
+          <h1 className="text-xl font-bold text-slate-800">{analyzedNog ? `Operación NOG: ${analyzedNog.nog}` : 'Centro de Inteligencia Comercial B2B'}</h1>
+          <span className="text-xs font-black text-emerald-700 bg-emerald-50 px-4 py-1.5 rounded-full border border-emerald-200 flex items-center gap-2"><div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></div> Sincronizado: Guatecompras API</span>
         </nav>
 
         <main className="p-6 md:p-8 space-y-8 overflow-y-auto">
@@ -388,12 +387,12 @@ export default function App() {
                 <div className="bg-white p-12 rounded-2xl shadow-sm border border-slate-200 text-center">
                   <div className="flex justify-center mb-4"><Fingerprint size={64} className="text-blue-600"/></div>
                   <h2 className="text-3xl font-black text-slate-900 mb-2">Analizador Profundo de Eventos (NOG)</h2>
-                  <p className="text-sm text-slate-500 mb-8 max-w-xl mx-auto">El motor IA escaneará la base de Guatecompras, extraerá bases, identificará fianzas exactas, visitas técnicas, cruzará competidores con {'>'}70% de similitud y desglosará el producto.</p>
+                  <p className="text-sm text-slate-500 mb-8 max-w-xl mx-auto">El motor IA escaneará la base de Guatecompras, extraerá bases, identificará fianzas, visitas técnicas, cruzará competidores con más del 70% de similitud y desglosará el requerimiento de producto.</p>
                   
                   <form onSubmit={handleAnalyzeNog} className="flex max-w-2xl mx-auto gap-4">
                     <input type="text" value={nogSearchInput} onChange={(e)=>setNogSearchInput(e.target.value)} placeholder="Ej. 32560508" className="flex-1 px-6 py-4 rounded-xl border border-slate-300 focus:border-blue-600 outline-none font-bold text-lg bg-slate-50" required/>
                     <button type="submit" disabled={isAnalyzing} className="bg-blue-600 hover:bg-blue-700 text-white font-black px-10 py-4 rounded-xl shadow-md transition-all flex items-center gap-2">
-                      {isAnalyzing ? <RefreshCw className="animate-spin" size={20}/> : <Cpu size={20}/>} {isAnalyzing ? 'Analizando (-25 TKN)' : 'Ejecutar Análisis IA'}
+                      {isAnalyzing ? <RefreshCw className="animate-spin" size={20}/> : <Cpu size={20}/>} {isAnalyzing ? 'Analizando (-25 TKN)' : 'Ejecutar Análisis'}
                     </button>
                   </form>
                 </div>
@@ -402,9 +401,9 @@ export default function App() {
                   {/* SUB-NAVEGACIÓN DEL DOSSIER */}
                   <div className="flex flex-wrap gap-2 border-b border-slate-200 pb-4">
                     <button onClick={() => setDetailSubTab('RESUMEN')} className={`px-4 py-2 rounded-xl text-sm font-bold transition-all ${detailSubTab === 'RESUMEN' ? 'bg-slate-900 text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'}`}>Ficha Oficial y Fianzas</button>
-                    <button onClick={() => setDetailSubTab('CRITERIOS')} className={`px-4 py-2 rounded-xl text-sm font-bold transition-all flex items-center gap-2 ${detailSubTab === 'CRITERIOS' ? 'bg-emerald-600 text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'}`}><Scale size={16}/> Extracción IA (Producto / Requisitos)</button>
-                    <button onClick={() => setDetailSubTab('COMPETENCIA')} className={`px-4 py-2 rounded-xl text-sm font-bold transition-all flex items-center gap-2 ${detailSubTab === 'COMPETENCIA' ? 'bg-purple-600 text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'}`}><Crosshair size={16}/> Similitud Competitiva (3 Años)</button>
-                    <button onClick={() => setDetailSubTab('OPERACION')} className={`px-4 py-2 rounded-xl text-sm font-bold transition-all flex items-center gap-2 ${detailSubTab === 'OPERACION' ? 'bg-blue-600 text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'}`}><FileOutput size={16}/> Creador de Oferta (DOCX)</button>
+                    <button onClick={() => setDetailSubTab('CRITERIOS')} className={`px-4 py-2 rounded-xl text-sm font-bold transition-all flex items-center gap-2 ${detailSubTab === 'CRITERIOS' ? 'bg-emerald-600 text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'}`}><Scale size={16}/> Extracción IA (Producto y Requisitos)</button>
+                    <button onClick={() => setDetailSubTab('COMPETENCIA')} className={`px-4 py-2 rounded-xl text-sm font-bold transition-all flex items-center gap-2 ${detailSubTab === 'COMPETENCIA' ? 'bg-purple-600 text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'}`}><Crosshair size={16}/> Similitud Competitiva &gt;70%</button>
+                    <button onClick={() => setDetailSubTab('OPERACION')} className={`px-4 py-2 rounded-xl text-sm font-bold transition-all flex items-center gap-2 ${detailSubTab === 'OPERACION' ? 'bg-blue-600 text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'}`}><FileOutput size={16}/> Exportación Operativa (DOCX)</button>
                   </div>
 
                   {detailSubTab === 'RESUMEN' && (
@@ -416,7 +415,7 @@ export default function App() {
                           <p className="text-slate-600 mt-2 text-sm max-w-2xl">{analyzedNog.description}</p>
                         </div>
                         <div className="text-right">
-                          <span className={`text-xs font-black px-4 py-2 rounded-md border inline-block ${analyzedNog.semaforo === 'ROJO' ? 'bg-rose-100 text-rose-800 border-rose-200' : 'bg-emerald-100 text-emerald-800 border-emerald-200'}`}>CIERRA EN {analyzedNog.horasRestantes}h</span>
+                          <span className={`text-xs font-black px-4 py-2 rounded-md border inline-block ${analyzedNog.semaforo === 'ROJO' ? 'bg-rose-100 text-rose-800 border-rose-200' : 'bg-emerald-100 text-emerald-800 border-emerald-200'}`}>ESTATUS: VIGENTE ({analyzedNog.horasRestantes}h)</span>
                         </div>
                       </div>
                       
@@ -425,13 +424,13 @@ export default function App() {
                         <div className="grid grid-cols-3 border-b border-slate-50 py-2"><span className="font-bold text-slate-500">Unidad Compradora:</span><span className="col-span-2 font-bold text-slate-900">{analyzedNog.unidadCompradora}</span></div>
                         <div className="grid grid-cols-3 border-b border-slate-50 py-2"><span className="font-bold text-slate-500">Modalidad Exacta:</span><span className="col-span-2 font-black text-purple-700 bg-purple-50 px-2 py-0.5 rounded w-max">{analyzedNog.procurementType}</span></div>
                         <div className="grid grid-cols-3 border-b border-slate-50 py-2"><span className="font-bold text-slate-500">Categoría Oficial:</span><span className="col-span-2 font-bold text-slate-900">{analyzedNog.category}</span></div>
+                        <div className="grid grid-cols-3 border-b border-slate-50 py-2"><span className="font-bold text-slate-500">Recepción:</span><span className="col-span-2 font-bold text-slate-700">Electrónica y Documental</span></div>
                         <div className="grid grid-cols-3 border-b border-slate-50 py-2"><span className="font-bold text-slate-500">Presupuesto Ref.:</span><span className="col-span-2 font-black text-emerald-600">Q {analyzedNog.estimatedBudget?.toLocaleString()}</span></div>
                       </div>
-
                       <div className="mt-8 bg-amber-50 p-6 rounded-xl border border-amber-200">
                         <h4 className="text-sm font-black text-amber-900 uppercase tracking-wide mb-4">Estructura de Fianzas Exigida</h4>
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                          <div><span className="block text-xs font-bold text-amber-700 mb-1">Sostenimiento Oferta:</span><span className="text-2xl font-black text-slate-900">{analyzedNog.fianzaSostenimiento}</span></div>
+                          <div><span className="block text-xs font-bold text-amber-700 mb-1">Sostenimiento de Oferta:</span><span className="text-2xl font-black text-slate-900">{analyzedNog.fianzaSostenimiento}</span></div>
                           <div><span className="block text-xs font-bold text-amber-700 mb-1">Cumplimiento / Calidad:</span><span className="text-2xl font-black text-slate-900">{analyzedNog.fianzaCumplimiento}</span></div>
                           <div><span className="block text-xs font-bold text-amber-700 mb-1">Beneficiario Institucional:</span><span className="text-sm font-bold text-slate-700 leading-tight">{analyzedNog.beneficiarioFianza}</span></div>
                         </div>
@@ -470,7 +469,7 @@ export default function App() {
                       </div>
 
                       <div className="bg-white rounded-2xl p-8 shadow-md border border-slate-200">
-                        <h3 className="text-lg font-black text-slate-800 mb-6 flex items-center gap-2"><Search className="text-purple-600"/> Análisis IA de Producto</h3>
+                        <h3 className="text-lg font-black text-slate-800 mb-6 flex items-center gap-2"><Search className="text-purple-600"/> Análisis IA de Producto/Servicio</h3>
                         <div className="space-y-4">
                           <div className="bg-slate-50 p-4 rounded-xl border border-slate-100">
                             <span className="block text-[10px] font-bold text-slate-400 uppercase mb-1">Tipo de Bien Solicitado</span>
@@ -479,7 +478,9 @@ export default function App() {
                           <div className="bg-slate-50 p-4 rounded-xl border border-slate-100">
                             <span className="block text-[10px] font-bold text-slate-400 uppercase mb-2">Marcas / Especificación Aceptada</span>
                             <div className="flex gap-2">
-                              {analyzedNog.aiProductExtraction.marcasAceptadas.map((m:string, i:number)=>(<span key={i} className="bg-purple-100 text-purple-800 px-2 py-1 rounded text-xs font-bold">{m}</span>))}
+                              {analyzedNog.aiProductExtraction.marcasAceptadas.map((m:string, i:number)=>(
+                                <span key={i} className="bg-purple-100 text-purple-800 px-2 py-1 rounded text-xs font-bold">{m}</span>
+                              ))}
                             </div>
                           </div>
                           <div className="bg-slate-50 p-4 rounded-xl border border-slate-100">
@@ -502,19 +503,19 @@ export default function App() {
                       <div className="bg-purple-50 border border-purple-200 rounded-xl p-6 mb-8 flex items-start gap-4">
                         <Brain className="text-purple-600 flex-shrink-0" size={32}/>
                         <div>
-                          <h4 className="font-black text-purple-900 mb-1 text-lg">Coincidencia de Rubros > 70%</h4>
+                          <h4 className="font-black text-purple-900 mb-1 text-lg">Coincidencia de Rubros &gt; 70%</h4>
                           <p className="text-sm text-purple-800 leading-relaxed">El motor cruzó el requerimiento técnico de este NOG con el historial de compras de <strong>{analyzedNog.unidadCompradora}</strong> y encontró un evento pasado con un <strong>{analyzedNog.historicalCompetition.similarityScore}% de similitud técnica</strong>.</p>
                         </div>
                       </div>
 
                       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
                         <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
-                          <span className="text-xs font-bold text-slate-400 uppercase block mb-2">Proveedor Adjudicado (Histórico)</span>
+                          <span className="text-xs font-bold text-slate-400 uppercase block mb-2">Proveedor Adjudicado Anterior</span>
                           <div className="text-xl font-black text-slate-800">{analyzedNog.historicalCompetition.previousWinner}</div>
                           <span className="text-[10px] bg-slate-100 text-slate-600 px-2 py-1 rounded mt-3 inline-block border border-slate-200">Ref NOG Antiguo: {analyzedNog.historicalCompetition.previousNog}</span>
                         </div>
                         <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
-                          <span className="text-xs font-bold text-slate-400 uppercase block mb-2">Precio Adjudicado (Hace {analyzedNog.historicalCompetition.yearsAgo} años)</span>
+                          <span className="text-xs font-bold text-slate-400 uppercase block mb-2">Precio Adjudicado Anterior</span>
                           <div className="text-2xl font-black text-emerald-600">Q {analyzedNog.historicalCompetition.previousPrice.toLocaleString()}</div>
                           <span className="text-xs font-bold text-rose-500 block mt-2">{analyzedNog.historicalCompetition.trend}</span>
                         </div>
@@ -526,8 +527,8 @@ export default function App() {
                           </div>
                           {simulationResult && (
                             <div className="bg-slate-800 text-white p-3 rounded-lg text-xs font-medium border border-slate-700">
-                              Oferta Ganadora: <span className="font-black text-emerald-400 block text-lg mb-1">Q {simulationResult.suggestedBid}</span>
-                              Margen de Venta: <span className="text-blue-400 font-bold">{simulationResult.estimatedMargin}%</span>
+                              Sug. Ganadora: <span className="font-black text-emerald-400 block text-lg mb-1">Q {simulationResult.suggestedBid}</span>
+                              Margen: <span className="text-blue-400 font-bold">{simulationResult.estimatedMargin}%</span>
                             </div>
                           )}
                         </div>
@@ -539,11 +540,11 @@ export default function App() {
                     <div className="bg-white rounded-2xl p-8 shadow-md border border-slate-200 text-center py-16">
                       <FileOutput size={48} className="text-blue-600 mx-auto mb-4"/>
                       <h3 className="text-2xl font-black text-slate-900 mb-2">Generador Operativo de Licitación</h3>
-                      <p className="text-sm text-slate-500 mb-8 max-w-lg mx-auto">Exporta el análisis profundo a documentos editables (Word) para que tu equipo comercial documente la oferta sin perder tiempo copiando y pegando bases.</p>
+                      <p className="text-sm text-slate-500 mb-8 max-w-lg mx-auto">Exporta el análisis profundo a documentos editables para tu equipo legal y comercial.</p>
                       
                       <div className="flex flex-col md:flex-row justify-center gap-6">
-                        <button onClick={() => alert("Generando DOCX con Checklist de Requisitos Habilitantes, Fianzas y Fechas Técnicas...")} className="bg-slate-900 hover:bg-slate-800 text-white font-bold py-4 px-8 rounded-xl shadow-lg flex items-center justify-center gap-3">
-                          <FileText size={20}/> Descargar Checklist Completo (DOC)
+                        <button onClick={() => alert("Generando DOCX con Checklist de Requisitos Habilitantes, Fianzas y Visitas...")} className="bg-slate-900 hover:bg-slate-800 text-white font-bold py-4 px-8 rounded-xl shadow-lg flex items-center justify-center gap-3">
+                          <FileText size={20}/> Descargar Checklist (DOC)
                         </button>
                         <button onClick={() => alert("Generando DOCX con el Índice Sugerido de la Oferta Técnica y Económica...")} className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 px-8 rounded-xl shadow-lg flex items-center justify-center gap-3">
                           <FileText size={20}/> Generar Índice de Oferta (DOC)
@@ -576,14 +577,14 @@ export default function App() {
             </div>
           )}
 
-          {/* MÓDULO 2: RADAR DE BÚSQUEDA Y LAS 30 MODALIDADES */}
+          {/* MÓDULO 2: RADAR DE BÚSQUEDA Y MODALIDADES DE COMPRA */}
           {activeTab === 'ALERTAS' && (
             <div className="space-y-6">
               <div className="bg-white p-8 rounded-2xl shadow-sm border border-slate-200 space-y-6">
                 <div>
                   <label className="block text-xs font-black text-slate-500 uppercase tracking-wider mb-3">1. Filtrar por Modalidad de Compra Oficial</label>
                   <select value={filterModalidad} onChange={(e) => setFilterModalidad(e.target.value)} className="w-full md:max-w-xl px-4 py-3 border rounded-xl bg-slate-50 font-bold text-sm outline-none focus:border-blue-600 cursor-pointer">
-                    <option value="TODAS">TODAS LAS MODALIDADES (BARREDO COMPLETO)</option>
+                    <option value="TODAS">TODAS LAS MODALIDADES (BARRIDO COMPLETO)</option>
                     {TODAS_LAS_MODALIDADES.map(mod => <option key={mod} value={mod}>{mod.toUpperCase()}</option>)}
                   </select>
                 </div>
@@ -633,12 +634,12 @@ export default function App() {
             </div>
           )}
 
-          {/* MÓDULO: CREACIÓN DE CATEGORÍAS CUSTOM (LABORATORIO) */}
+          {/* LABORATORIO */}
           {activeTab === 'LABORATORIO' && (
             <div className="bg-white rounded-2xl p-8 shadow-sm border border-slate-200 space-y-6">
               <div>
                 <h3 className="text-xl font-black text-slate-800 flex items-center gap-2"><Cpu className="text-blue-600"/> Laboratorio de Algoritmos (Categorías Custom)</h3>
-                <p className="text-sm text-slate-500 mt-2">Crea segmentos propios para que la IA agrupe eventos que beneficien tu estrategia, sin depender solo de Guatecompras.</p>
+                <p className="text-sm text-slate-500 mt-2">Crea segmentos propios para que la IA agrupe eventos que beneficien tu estrategia.</p>
               </div>
               <div className="bg-slate-50 p-6 rounded-xl border border-slate-200 shadow-inner">
                 <label className="block text-sm font-bold text-slate-700 uppercase tracking-wide mb-3">Definir Nueva Categoría (Ej. 'Software Médico')</label>
@@ -647,23 +648,25 @@ export default function App() {
                   <button onClick={() => { if(newCustomCat) { setCustomCategories([...customCategories, newCustomCat]); setNewCustomCat(''); alert('Categoría algorítmica creada e integrada al buscador.'); } }} className="bg-blue-600 hover:bg-blue-700 text-white text-sm font-bold px-8 py-3 rounded-xl shadow-md">Crear Segmento</button>
                 </div>
               </div>
-              {customCategories.length > 0 && (
-                <div className="mt-4">
-                  <h4 className="text-xs font-bold text-slate-500 uppercase mb-3">Tus Segmentos Activos:</h4>
-                  <div className="flex flex-wrap gap-2">
-                    {customCategories.map((c, i) => <span key={i} className="bg-purple-100 text-purple-800 px-3 py-1.5 rounded-lg text-xs font-bold border border-purple-200">{c}</span>)}
-                  </div>
-                </div>
-              )}
             </div>
           )}
 
-          {/* MÓDULO: WORKSPACE OPERATIVO */}
+          {/* RECUPERACIÓN / COMPETENCIA */}
+          {activeTab === 'RECUPERACION' && (
+            <div className="bg-white rounded-2xl p-8 shadow-sm border border-slate-200 space-y-6">
+              <div>
+                <h3 className="text-xl font-black text-slate-800 mb-2 flex items-center gap-2"><RefreshCw className="text-blue-600"/> Inteligencia de Competencia (Contratos Históricos)</h3>
+                <p className="text-sm text-slate-500">Revisa qué se adjudicó en los últimos 3 años para preparar tu táctica ofensiva antes de la renovación.</p>
+              </div>
+            </div>
+          )}
+
+          {/* WORKSPACE */}
           {activeTab === 'WORKSPACE' && (
             <div className="bg-white rounded-2xl p-8 shadow-sm border border-slate-200 text-center py-20">
               <Briefcase size={64} className="text-slate-300 mx-auto mb-4"/>
               <h3 className="text-2xl font-black text-slate-800 mb-2">Gestor Operativo de Licitaciones</h3>
-              <p className="text-sm text-slate-500 max-w-lg mx-auto">Este módulo te permitirá llevar el control Kanban (To-Do, In Progress, Done) de los NOGs que decidiste operar y participar desde el Analizador Profundo.</p>
+              <p className="text-sm text-slate-500 max-w-lg mx-auto">Este módulo te permitirá llevar el control Kanban (To-Do, In Progress, Done) de los NOGs que decidiste operar.</p>
             </div>
           )}
         </main>
