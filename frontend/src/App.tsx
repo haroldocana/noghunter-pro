@@ -72,25 +72,21 @@ export default function App() {
   const [isLoading, setIsLoading] = useState(false);
   const [isSearchingBases, setIsSearchingBases] = useState(false); 
 
-  // 🚀 ACTUALIZADO: NUEVA PESTAÑA 'PROVEEDORES'
   const [activeTab, setActiveTab] = useState<'DASHBOARD' | 'ANALIZADOR' | 'ALERTAS' | 'PROYECTOS_BASES' | 'PROVEEDORES' | 'WORKSPACE' | 'LABORATORIO'>('DASHBOARD');
   const [detailSubTab, setDetailSubTab] = useState<'RESUMEN' | 'HISTORIAL' | 'CRITERIOS' | 'COMPETENCIA' | 'OPERACION'>('RESUMEN');
 
-  // Filtros Generales Radar
   const [filterModalidad, setFilterModalidad] = useState('TODAS');
   const [selectedCategory, setSelectedCategory] = useState('TODAS');
   const [searchTerm, setSearchTerm] = useState('');
   const [customCategories, setCustomCategories] = useState<string[]>([]);
   const [newCustomCat, setNewCustomCat] = useState('');
 
-  // Estados Analizador NOG
   const [nogSearchInput, setNogSearchInput] = useState('');
   const [analyzedNog, setAnalyzedNog] = useState<any>(null);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [ourCost, setOurCost] = useState('');
   const [simulationResult, setSimulationResult] = useState<any>(null);
 
-  // Estados Buscador Proyectos de Bases
   const [pbFilterEntidad, setPbFilterEntidad] = useState('TODAS');
   const [pbFilterCategoria, setPbFilterCategoria] = useState('TODAS');
   const [pbFilterModalidad, setPbFilterModalidad] = useState('TODAS');
@@ -101,13 +97,11 @@ export default function App() {
   const [baseAnalysisResult, setBaseAnalysisResult] = useState<Record<string, any>>({});
   const [isAnalyzingBaseId, setIsAnalyzingBaseId] = useState<string | null>(null);
 
-  // 🚀 ESTADOS NUEVOS: BUSCADOR DE PROVEEDORES
-  const [proveedorSearchType, setProveedorSearchType] = useState('NIT'); // NIT, CUI, NOMBRE
+  const [proveedorSearchType, setProveedorSearchType] = useState('NIT');
   const [proveedorSearchTerm, setProveedorSearchTerm] = useState('');
   const [isSearchingProveedor, setIsSearchingProveedor] = useState(false);
   const [analyzedProveedor, setAnalyzedProveedor] = useState<any>(null);
 
-  // Arquitectura SaaS
   const [tokenPool, setTokenPool] = useState(48500);
   const [tenants, setTenants] = useState([
     { id: 1, name: 'Cropa DSV', nit: '123456-7', adminEmail: 'admin@cropa.com', activeUsers: 3, plan: 'PRO Anual', tokens: 50000, expires: '2027-11-01', gatewayId: 'cus_xyz123', status: 'Activo' }
@@ -116,7 +110,6 @@ export default function App() {
   const [checkoutMode, setCheckoutMode] = useState<'LICENSE' | 'TOKENS'>('LICENSE');
   const [successMsg, setSuccessMsg] = useState('');
 
-  // Workspace Kanban
   const [kanbanTasks, setKanbanTasks] = useState([
     { id: 1, title: 'Servidores PowerEdge', nog: '32560500', buyer: 'SAT', status: 'TODO' },
     { id: 2, title: 'Insumos Médicos IGSS', nog: '32560507', buyer: 'IGSS', status: 'IN_PROGRESS' }
@@ -133,12 +126,6 @@ export default function App() {
     }, 1000);
     return () => clearInterval(timer);
   }, []);
-
-  const formatCountdown = (seconds: number) => {
-    const hrs = Math.floor(seconds / 3600);
-    const mins = Math.floor((seconds % 3600) / 60);
-    return `${hrs}h ${mins}m ${seconds % 60}s`;
-  };
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -259,7 +246,6 @@ export default function App() {
     setSimulationResult({ suggestedBid: suggestedBid.toFixed(2), estimatedMargin: estimatedMargin.toFixed(1), winProbability: estimatedMargin > 15 ? 'Alta (78%)' : 'Moderada (52%)' });
   };
 
-  // 🚀 IA: ANÁLISIS DE VIABILIDAD PROYECTO DE BASES
   const handleAnalyzeProyectoBase = (baseId: string) => {
     const input = baseProductsInput[baseId];
     if(!input || input.trim() === '') { alert("Ingresa los productos o servicios."); return; }
@@ -279,16 +265,14 @@ export default function App() {
     }, 1500);
   };
 
-  // 🚀 LÓGICA: BUSCADOR DE PROVEEDORES (NUEVO MÓDULO)
   const handleBuscarProveedor = (e: React.FormEvent) => {
     e.preventDefault();
     if(!proveedorSearchTerm) return;
     setIsSearchingProveedor(true);
     setAnalyzedProveedor(null);
-    setTokenPool(prev => prev - 20); // Cobro IA por extracción
+    setTokenPool(prev => prev - 20); 
     
     setTimeout(() => {
-      // Mock Data basado en las imágenes de Guatecompras
       setAnalyzedProveedor({
         nit: proveedorSearchType === 'NIT' ? proveedorSearchTerm : "70154856",
         nombre: proveedorSearchType === 'NOMBRE' ? proveedorSearchTerm.toUpperCase() : "ESOURCE CAPITAL GUATEMALA, SOCIEDAD ANONIMA",
@@ -311,7 +295,6 @@ export default function App() {
     }, 1800);
   };
 
-  // Filtros
   const filteredNogs = nogs.filter(op => {
     const matchesCategory = selectedCategory === 'TODAS' || op.category === selectedCategory;
     const matchesModality = filterModalidad === 'TODAS' || op.procurementType.includes(filterModalidad);
@@ -327,9 +310,6 @@ export default function App() {
     return mEntidad && mCat && mMod && mEstatus;
   });
 
-  // ==========================================
-  // VISTAS EXTERNAS: LANDING, CHECKOUT, LOGIN
-  // ==========================================
   if (currentView === 'LANDING') {
     return (
       <div className="min-h-screen bg-slate-900 text-white flex flex-col items-center justify-center p-4">
@@ -467,7 +447,6 @@ export default function App() {
             <button onClick={() => {setActiveTab('ALERTAS'); setAnalyzedNog(null);}} className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all ${activeTab === 'ALERTAS' ? 'bg-blue-600 text-white shadow-lg' : 'hover:bg-slate-800'}`}><Target size={18}/> Buscador (30 Mod.)</button>
             <button onClick={() => {setActiveTab('PROYECTOS_BASES'); setAnalyzedNog(null);}} className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all ${activeTab === 'PROYECTOS_BASES' ? 'bg-blue-600 text-white shadow-lg' : 'hover:bg-slate-800'}`}><BookOpen size={18}/> Proyectos de Bases</button>
             
-            {/* 🚀 NUEVA PESTAÑA: ESPIONAJE DE PROVEEDORES */}
             <button onClick={() => {setActiveTab('PROVEEDORES'); setAnalyzedNog(null);}} className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all ${activeTab === 'PROVEEDORES' ? 'bg-blue-600 text-white shadow-lg' : 'hover:bg-slate-800'}`}><UserCheck size={18}/> Directorio Proveedores</button>
 
             <button onClick={() => {setActiveTab('WORKSPACE'); setAnalyzedNog(null);}} className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all ${activeTab === 'WORKSPACE' ? 'bg-blue-600 text-white shadow-lg' : 'hover:bg-slate-800'}`}><Layout size={18}/> Workspace Kanban</button>
@@ -494,9 +473,7 @@ export default function App() {
 
         <main className="p-6 md:p-8 space-y-8 overflow-y-auto">
           
-          {/* ========================================================= */}
-          {/* 🚀 NUEVO MÓDULO: ESPIONAJE DE PROVEEDORES                 */}
-          {/* ========================================================= */}
+          {/* ESPIONAJE DE PROVEEDORES */}
           {activeTab === 'PROVEEDORES' && (
             <div className="space-y-6 max-w-5xl mx-auto">
               {!analyzedProveedor ? (
@@ -519,7 +496,6 @@ export default function App() {
                 </div>
               ) : (
                 <div className="space-y-6 animate-in slide-in-from-bottom-4">
-                  {/* Ficha General del Proveedor */}
                   <div className="bg-white rounded-2xl p-8 shadow-md border-t-4 border-t-purple-600">
                     <div className="flex justify-between items-start mb-6 border-b border-slate-100 pb-6">
                       <div>
@@ -551,7 +527,6 @@ export default function App() {
                     </div>
                   </div>
 
-                  {/* Tabla Histórica de Adjudicaciones */}
                   <div className="bg-white rounded-2xl p-8 shadow-md border border-slate-200">
                     <h4 className="text-lg font-black text-slate-800 uppercase tracking-wide mb-6 flex items-center gap-2"><TableProperties size={20} className="text-blue-600"/> Adjudicaciones y Publicaciones Recibidas (Todas las Modalidades)</h4>
                     <div className="border border-slate-200 rounded-xl overflow-hidden">
@@ -599,7 +574,7 @@ export default function App() {
             </div>
           )}
 
-          {/* MÓDULO: ANALIZADOR PROFUNDO NOG (DOSSIER) */}
+          {/* ANALIZADOR PROFUNDO NOG */}
           {(activeTab === 'ANALIZADOR' || analyzedNog) && (
             <div className="space-y-6 max-w-5xl mx-auto">
               {!analyzedNog ? (
@@ -754,7 +729,7 @@ export default function App() {
             </div>
           )}
 
-          {/* 🚀 MÓDULO: PROYECTOS DE BASES (BORRADORES) */}
+          {/* PROYECTOS DE BASES (BORRADORES) */}
           {activeTab === 'PROYECTOS_BASES' && (
             <div className="space-y-6">
               <div className="bg-white p-8 rounded-2xl shadow-sm border border-slate-200 space-y-6">
@@ -843,7 +818,7 @@ export default function App() {
             </div>
           )}
 
-          {/* DASHBOARD EJECUTIVO */}
+          {/* 🚀 DASHBOARD EJECUTIVO COMPLETO Y RESTAURADO */}
           {activeTab === 'DASHBOARD' && (
             <div className="space-y-8">
               <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
@@ -859,6 +834,65 @@ export default function App() {
                   <div className="bg-rose-50 border border-rose-200 p-6 rounded-xl text-center shadow-inner"><span className="text-xs font-bold text-rose-800 uppercase">🔴 Cierran Hoy (Crítico)</span><div className="text-5xl font-black text-rose-700 mt-2">{nogs.filter(n => n?.semaforo === 'ROJO').length}</div></div>
                   <div className="bg-amber-50 border border-amber-200 p-6 rounded-xl text-center shadow-inner"><span className="text-xs font-bold text-amber-800 uppercase">🟡 Mañana (Prevención)</span><div className="text-5xl font-black text-amber-700 mt-2">{nogs.filter(n => n?.semaforo === 'AMARILLO').length}</div></div>
                   <div className="bg-emerald-50 border border-emerald-200 p-6 rounded-xl text-center shadow-inner"><span className="text-xs font-bold text-emerald-800 uppercase">🟢 Más de 3 Días (A Tiempo)</span><div className="text-5xl font-black text-emerald-700 mt-2">{nogs.filter(n => n?.semaforo === 'VERDE').length}</div></div>
+                </div>
+              </div>
+
+              {/* TOTALIDAD VIGENTES POR MODALIDAD PRINCIPAL (SIN REPETIRSE) */}
+              <div className="bg-white rounded-2xl p-8 shadow-sm border border-slate-200">
+                <h3 className="text-base font-black text-slate-800 uppercase tracking-wider mb-6 flex items-center gap-2"><BarChart3 size={20} className="text-blue-600"/> Totalidad Vigentes por Modalidad Principal</h3>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                  <div className="bg-slate-50 p-6 rounded-xl border border-slate-200">
+                    <span className="text-xs font-bold text-slate-500 uppercase block mb-1">Compra Directa / Baja Cuantía</span>
+                    <div className="text-3xl font-black text-blue-600">
+                      {nogs.filter(n => n.procurementType?.toLowerCase().includes('directa') || n.procurementType?.toLowerCase().includes('cuantía')).length}
+                    </div>
+                  </div>
+                  <div className="bg-slate-50 p-6 rounded-xl border border-slate-200">
+                    <span className="text-xs font-bold text-slate-500 uppercase block mb-1">Cotización (Art. 38 LCE)</span>
+                    <div className="text-3xl font-black text-purple-600">
+                      {nogs.filter(n => n.procurementType?.toLowerCase().includes('cotización')).length}
+                    </div>
+                  </div>
+                  <div className="bg-slate-50 p-6 rounded-xl border border-slate-200">
+                    <span className="text-xs font-bold text-slate-500 uppercase block mb-1">Licitación Pública (Art. 17)</span>
+                    <div className="text-3xl font-black text-emerald-600">
+                      {nogs.filter(n => n.procurementType?.toLowerCase().includes('licitación pública')).length}
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* LISTA DE EVENTOS POR VENCER AGRUPADOS POR CATEGORÍA */}
+              <div className="bg-white rounded-2xl p-8 shadow-sm border border-slate-200">
+                <h3 className="text-base font-black text-slate-800 uppercase tracking-wider mb-6 flex items-center gap-2"><AlertCircle size={20} className="text-amber-500"/> Lista de Eventos por Vencer (Agrupados por Categoría)</h3>
+                
+                <div className="space-y-6">
+                  {GUATECOMPRAS_CATEGORIAS.map(cat => {
+                    const nogsDeCat = nogs.filter(n => n.category === cat.name && (n.semaforo === 'ROJO' || n.semaforo === 'AMARILLO'));
+                    if (nogsDeCat.length === 0) return null;
+
+                    return (
+                      <div key={cat.id} className="border border-slate-200 rounded-xl p-5 bg-slate-50/50">
+                        <div className="flex justify-between items-center mb-4 pb-2 border-b border-slate-200">
+                          <h4 className="font-black text-slate-800 text-sm">{cat.name}</h4>
+                          <span className="bg-amber-100 text-amber-800 text-xs font-bold px-2.5 py-0.5 rounded-full">{nogsDeCat.length} por vencer</span>
+                        </div>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                          {nogsDeCat.map(item => (
+                            <div key={item.id} className="bg-white p-3 rounded-lg border border-slate-200 flex justify-between items-center shadow-xs">
+                              <div>
+                                <span className="text-[10px] font-black bg-slate-100 text-slate-700 px-1.5 py-0.5 rounded">NOG: {item.nog}</span>
+                                <p className="text-xs font-bold text-slate-800 mt-1 truncate max-w-xs">{item.title}</p>
+                              </div>
+                              <span className={`text-[10px] font-black px-2 py-1 rounded ${item.semaforo === 'ROJO' ? 'bg-rose-100 text-rose-700' : 'bg-amber-100 text-amber-700'}`}>
+                                {item.horasRestantes}h
+                              </span>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    );
+                  })}
                 </div>
               </div>
             </div>
