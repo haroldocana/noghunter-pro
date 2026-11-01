@@ -3,8 +3,10 @@ import cors from 'cors';
 import mongoose from 'mongoose';
 import path from 'path';
 import authRoutes from './routes/authRoutes';
-// 1. Importamos adminRoutes (este es el nombre correcto de tu archivo)
 import adminRoutes from './routes/adminRoutes';
+// 🚀 1. Importamos las rutas de NOGs (Buscador y Analizador) y pagos (Pasarela)
+import nogRoutes from './routes/nogRoutes';
+import paymentRoutes from './routes/paymentRoutes';
 
 const app = express();
 
@@ -31,9 +33,11 @@ const connectDB = async () => {
 // 2. RUTAS DE LA API (BACKEND)
 // ==========================================
 app.use('/api/auth', authRoutes);
-
-// 2. Montamos la ruta de adminRoutes en /api/admin
 app.use('/api/admin', adminRoutes);
+
+// 🚀 2. Montamos las nuevas rutas en el servidor Express
+app.use('/api', nogRoutes);           // Expone /api/nogs y /api/nogs/:identifier
+app.use('/api', paymentRoutes);       // Expone /api/payments/webhook
 
 app.get('/api/health', (req, res) => {
   res.json({ status: 'OK', timestamp: new Date() });
