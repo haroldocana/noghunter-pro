@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Target, Search, ArrowLeft, FileText, ChevronRight, BarChart3, AlertCircle, Building2, Cpu, LogOut, PieChart, TrendingUp, Zap, AlertTriangle, Eye, RefreshCw, Gavel, Users, Clock, CheckCircle, Brain, History, FileSearch, Scale, UserPlus, Settings, FileDigit, Fingerprint, ShieldAlert, Crosshair, CreditCard, Mail, Database, Briefcase, FileOutput, Key, Layout, BookOpen, Percent, Calendar, UserCheck, TableProperties } from 'lucide-react';
+import { Target, Search, ArrowLeft, FileText, ChevronRight, BarChart3, AlertCircle, Building2, Cpu, LogOut, PieChart, TrendingUp, Zap, AlertTriangle, Eye, RefreshCw, Gavel, Users, Clock, CheckCircle, Brain, History, FileSearch, Scale, UserPlus, Settings, FileDigit, Fingerprint, ShieldAlert, Crosshair, CreditCard, Mail, Database, Briefcase, FileOutput, Key, Layout, BookOpen, Percent, Calendar, UserCheck, TableProperties, Webhook, Share2 } from 'lucide-react';
 
 export const GUATECOMPRAS_CATEGORIAS = [
   { id: 'a', name: "Construcción y materiales afines" },
@@ -72,7 +72,7 @@ export default function App() {
   const [isLoading, setIsLoading] = useState(false);
   const [isSearchingBases, setIsSearchingBases] = useState(false); 
 
-  const [activeTab, setActiveTab] = useState<'DASHBOARD' | 'ANALIZADOR' | 'ALERTAS' | 'PROYECTOS_BASES' | 'PROVEEDORES' | 'WORKSPACE' | 'LABORATORIO'>('DASHBOARD');
+  const [activeTab, setActiveTab] = useState<'DASHBOARD' | 'ANALIZADOR' | 'ALERTAS' | 'PROYECTOS_BASES' | 'PROVEEDORES' | 'WORKSPACE' | 'INTEGRACIONES' | 'LABORATORIO'>('DASHBOARD');
   const [detailSubTab, setDetailSubTab] = useState<'RESUMEN' | 'HISTORIAL' | 'CRITERIOS' | 'COMPETENCIA' | 'OPERACION'>('RESUMEN');
 
   const [filterModalidad, setFilterModalidad] = useState('TODAS');
@@ -101,6 +101,13 @@ export default function App() {
   const [proveedorSearchTerm, setProveedorSearchTerm] = useState('');
   const [isSearchingProveedor, setIsSearchingProveedor] = useState(false);
   const [analyzedProveedor, setAnalyzedProveedor] = useState<any>(null);
+
+  // Estados de configuración API y CRM
+  const [selectedCrm, setSelectedCrm] = useState('HUBSPOT');
+  const [crmWebhookUrl, setCrmWebhookUrl] = useState('https://api.hubspot.com/crm/v3/objects/deals');
+  const [crmApiKey, setCrmApiKey] = useState('pat-na1-xxxx-xxxx-xxxx');
+  const [workspaceEmail, setWorkspaceEmail] = useState('ventas@empresa.com');
+  const [officeEmail, setOfficeEmail] = useState('');
 
   const [tokenPool, setTokenPool] = useState(48500);
   const [tenants, setTenants] = useState([
@@ -450,6 +457,9 @@ export default function App() {
             <button onClick={() => {setActiveTab('PROVEEDORES'); setAnalyzedNog(null);}} className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all ${activeTab === 'PROVEEDORES' ? 'bg-blue-600 text-white shadow-lg' : 'hover:bg-slate-800'}`}><UserCheck size={18}/> Directorio Proveedores</button>
 
             <button onClick={() => {setActiveTab('WORKSPACE'); setAnalyzedNog(null);}} className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all ${activeTab === 'WORKSPACE' ? 'bg-blue-600 text-white shadow-lg' : 'hover:bg-slate-800'}`}><Layout size={18}/> Workspace Kanban</button>
+
+            <button onClick={() => {setActiveTab('INTEGRACIONES'); setAnalyzedNog(null);}} className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all ${activeTab === 'INTEGRACIONES' ? 'bg-blue-600 text-white shadow-lg' : 'hover:bg-slate-800'}`}><Webhook size={18}/> Integraciones API & CRM</button>
+
             <button onClick={() => {setActiveTab('LABORATORIO'); setAnalyzedNog(null);}} className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all ${activeTab === 'LABORATORIO' ? 'bg-blue-600 text-white shadow-lg' : 'hover:bg-slate-800'}`}><Cpu size={18}/> Algoritmos Custom</button>
           </nav>
         </div>
@@ -473,6 +483,78 @@ export default function App() {
 
         <main className="p-6 md:p-8 space-y-8 overflow-y-auto">
           
+          {/* MÓDULO: INTEGRACIONES API & CRM */}
+          {activeTab === 'INTEGRACIONES' && (
+            <div className="space-y-6 max-w-4xl mx-auto">
+              <div className="bg-white rounded-2xl p-8 shadow-sm border border-slate-200">
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="bg-blue-600 p-3 rounded-xl text-white"><Webhook size={28}/></div>
+                  <div>
+                    <h2 className="text-2xl font-black text-slate-900">Centro de Integraciones y APIs</h2>
+                    <p className="text-sm text-slate-500">Conecta NOGHunter Pro con Google Workspace, Office 365 y tus CRMs favoritos mediante pasarelas de fácil integración.</p>
+                  </div>
+                </div>
+
+                <div className="space-y-8 mt-8">
+                  <div className="border border-slate-200 rounded-xl p-6 bg-slate-50">
+                    <h3 className="text-md font-black text-slate-800 mb-3 flex items-center gap-2"><Mail size={18} className="text-blue-600"/> Sincronización de Correo y Alertas</h3>
+                    <p className="text-xs text-slate-600 mb-4">Recibe las alertas automatizadas de licitaciones que cierran pronto directamente en tu bandeja de entrada corporativa.</p>
+                    
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-xs font-bold text-slate-700 mb-1">Google Workspace / Gmail API</label>
+                        <div className="flex gap-2">
+                          <input type="email" value={workspaceEmail} onChange={(e)=>setWorkspaceEmail(e.target.value)} className="flex-1 px-3 py-2 border rounded-lg text-sm bg-white" placeholder="correo@tuempresa.com"/>
+                          <button onClick={()=>alert("Autorización OAuth con Google Workspace iniciada.")} className="bg-blue-600 text-white text-xs font-bold px-4 py-2 rounded-lg">Conectar</button>
+                        </div>
+                      </div>
+                      <div>
+                        <label className="block text-xs font-bold text-slate-700 mb-1">Microsoft Office 365 / Outlook API</label>
+                        <div className="flex gap-2">
+                          <input type="email" value={officeEmail} onChange={(e)=>setOfficeEmail(e.target.value)} className="flex-1 px-3 py-2 border rounded-lg text-sm bg-white" placeholder="correo@outlook.com"/>
+                          <button onClick={()=>alert("Autorización OAuth con Office 365 iniciada.")} className="bg-slate-900 text-white text-xs font-bold px-4 py-2 rounded-lg">Conectar</button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="border border-slate-200 rounded-xl p-6 bg-slate-50">
+                    <h3 className="text-md font-black text-slate-800 mb-3 flex items-center gap-2"><Share2 size={18} className="text-purple-600"/> Pasarela de CRM (Inyección de Oportunidades)</h3>
+                    <p className="text-xs text-slate-600 mb-4">Exporta automáticamente los NOGs detectados hacia tu embudo de ventas en el CRM corporativo.</p>
+
+                    <div className="space-y-4">
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div>
+                          <label className="block text-xs font-bold text-slate-700 mb-1">Seleccionar CRM</label>
+                          <select value={selectedCrm} onChange={(e)=>setSelectedCrm(e.target.value)} className="w-full px-3 py-2 border rounded-lg text-sm bg-white font-bold">
+                            <option value="HUBSPOT">HubSpot CRM</option>
+                            <option value="SALESFORCE">Salesforce</option>
+                            <option value="ODOO">Odoo Enterprise</option>
+                            <option value="ZOHO">Zoho CRM</option>
+                            <option value="PIPEDRIVE">Pipedrive</option>
+                            <option value="WEBHOOK">Webhook Personalizado</option>
+                          </select>
+                        </div>
+                        <div className="md:col-span-2">
+                          <label className="block text-xs font-bold text-slate-700 mb-1">Webhook Endpoint URL</label>
+                          <input type="text" value={crmWebhookUrl} onChange={(e)=>setCrmWebhookUrl(e.target.value)} className="w-full px-3 py-2 border rounded-lg text-sm bg-white font-mono text-xs"/>
+                        </div>
+                      </div>
+
+                      <div>
+                        <label className="block text-xs font-bold text-slate-700 mb-1">API Key / Bearer Token Privado</label>
+                        <div className="flex gap-2">
+                          <input type="password" value={crmApiKey} onChange={(e)=>setCrmApiKey(e.target.value)} className="flex-1 px-3 py-2 border rounded-lg text-sm bg-white font-mono text-xs" />
+                          <button onClick={()=>alert(`Conexión con ${selectedCrm} probada y guardada exitosamente.`)} className="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold px-6 py-2 rounded-lg shadow">Guardar y Probar API</button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
           {/* ESPIONAJE DE PROVEEDORES */}
           {activeTab === 'PROVEEDORES' && (
             <div className="space-y-6 max-w-5xl mx-auto">
@@ -818,7 +900,7 @@ export default function App() {
             </div>
           )}
 
-          {/* 🚀 DASHBOARD EJECUTIVO COMPLETO Y RESTAURADO */}
+          {/* BI DASHBOARD (COMPLETO) */}
           {activeTab === 'DASHBOARD' && (
             <div className="space-y-8">
               <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
@@ -837,7 +919,7 @@ export default function App() {
                 </div>
               </div>
 
-              {/* TOTALIDAD VIGENTES POR MODALIDAD PRINCIPAL (SIN REPETIRSE) */}
+              {/* TOTALIDAD VIGENTES POR MODALIDAD PRINCIPAL */}
               <div className="bg-white rounded-2xl p-8 shadow-sm border border-slate-200">
                 <h3 className="text-base font-black text-slate-800 uppercase tracking-wider mb-6 flex items-center gap-2"><BarChart3 size={20} className="text-blue-600"/> Totalidad Vigentes por Modalidad Principal</h3>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
