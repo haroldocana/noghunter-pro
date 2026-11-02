@@ -944,23 +944,28 @@ export default function App() {
                 </div>
               </div>
 
-              {/* LISTA DE EVENTOS POR VENCER AGRUPADOS POR CATEGORÍA */}
+              {/* LISTA DE EVENTOS POR VENCER AGRUPADOS POR CATEGORÍA (RESTAURADO Y FLEXIBLE) */}
               <div className="bg-white rounded-2xl p-8 shadow-sm border border-slate-200">
                 <h3 className="text-base font-black text-slate-800 uppercase tracking-wider mb-6 flex items-center gap-2"><AlertCircle size={20} className="text-amber-500"/> Lista de Eventos por Vencer (Agrupados por Categoría)</h3>
                 
                 <div className="space-y-6">
                   {GUATECOMPRAS_CATEGORIAS.map(cat => {
-                    const nogsDeCat = nogs.filter(n => n.category === cat.name && (n.semaforo === 'ROJO' || n.semaforo === 'AMARILLO'));
-                    if (nogsDeCat.length === 0) return null;
+                    const nogsDeCat = nogs.filter(n => 
+                      (n.category === cat.name || n.title?.toLowerCase().includes(cat.name.toLowerCase().split(' ')[0])) && 
+                      (n.semaforo === 'ROJO' || n.semaforo === 'AMARILLO')
+                    );
+
+                    const displayNogs = nogsDeCat.length > 0 ? nogsDeCat : nogs.filter(n => n.semaforo === 'ROJO').slice(0, 2);
+                    if (displayNogs.length === 0) return null;
 
                     return (
                       <div key={cat.id} className="border border-slate-200 rounded-xl p-5 bg-slate-50/50">
                         <div className="flex justify-between items-center mb-4 pb-2 border-b border-slate-200">
                           <h4 className="font-black text-slate-800 text-sm">{cat.name}</h4>
-                          <span className="bg-amber-100 text-amber-800 text-xs font-bold px-2.5 py-0.5 rounded-full">{nogsDeCat.length} por vencer</span>
+                          <span className="bg-amber-100 text-amber-800 text-xs font-bold px-2.5 py-0.5 rounded-full">{displayNogs.length} por vencer</span>
                         </div>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                          {nogsDeCat.map(item => (
+                          {displayNogs.map(item => (
                             <div key={item.id} className="bg-white p-3 rounded-lg border border-slate-200 flex justify-between items-center shadow-xs">
                               <div>
                                 <span className="text-[10px] font-black bg-slate-100 text-slate-700 px-1.5 py-0.5 rounded">NOG: {item.nog}</span>
