@@ -109,6 +109,9 @@ export default function App() {
   const [workspaceEmail, setWorkspaceEmail] = useState('ventas@empresa.com');
   const [officeEmail, setOfficeEmail] = useState('');
 
+  // 🚀 Estado de navegación para Superadmin
+  const [superAdminTab, setSuperAdminTab] = useState<'TENANTS' | 'PAGOS'>('TENANTS');
+
   const [tokenPool, setTokenPool] = useState(48500);
   const [tenants, setTenants] = useState([
     { id: 1, name: 'Cropa DSV', nit: '123456-7', adminEmail: 'admin@cropa.com', activeUsers: 3, plan: 'PRO Anual', tokens: 50000, expires: '2027-11-01', gatewayId: 'cus_xyz123', status: 'Activo' }
@@ -337,26 +340,32 @@ export default function App() {
         <button onClick={() => setCurrentView('LANDING')} className="absolute top-6 left-6 text-sm text-slate-500 font-bold flex items-center gap-1"><ArrowLeft size={16}/> Volver</button>
         <div className="max-w-md w-full bg-white rounded-3xl shadow-xl p-8 space-y-6">
           <div className="text-center mb-6">
-            <h2 className="text-3xl font-black text-slate-900">{checkoutMode === 'LICENSE' ? 'Suscripción Tenant' : 'Recarga de Tokens IA'}</h2>
-            <div className="text-4xl font-black text-blue-600 mt-2">{checkoutMode === 'LICENSE' ? 'Q 12,500' : 'Q 1,500'} <span className="text-sm text-slate-400 font-medium">{checkoutMode === 'LICENSE' ? '/ año' : '/ 50k Tokens'}</span></div>
-            <p className="text-xs text-slate-500 mt-2">{checkoutMode === 'LICENSE' ? 'Licencia Master, usuarios configurables y 50,000 tokens iniciales.' : 'Bolsón adicional para análisis IA y match de bases.'}</p>
+            <span className="bg-blue-100 text-blue-800 text-xs font-black px-3 py-1 rounded-full border border-blue-200">GARANTÍA B2B</span>
+            <h2 className="text-3xl font-black text-slate-900 mt-2">Prueba de 15 Días Gratis</h2>
+            <div className="text-4xl font-black text-blue-600 mt-2">Q 0.00 <span className="text-sm text-slate-400 font-medium">/ hoy</span></div>
+            <p className="text-xs text-slate-500 mt-2">Disfruta de acceso total a NOGHunter Pro durante 15 días. Requerimos tu tarjeta (Visa o Mastercard) para validar tu identidad. <strong>No se te hará ningún cargo hoy</strong>; la suscripción anual de Q 12,500 iniciará automáticamente al finalizar el periodo de prueba a menos que canceles antes.</p>
           </div>
           {successMsg ? (
             <div className="bg-emerald-50 text-emerald-800 p-4 rounded-xl border border-emerald-200 text-center font-bold text-sm"><CheckCircle className="inline mb-1" size={24}/><br/>{successMsg}</div>
           ) : (
             <form onSubmit={handleCheckoutSubmit} className="space-y-4">
-              <input type="text" className="w-full px-4 py-3 border rounded-xl bg-slate-50" placeholder="Razón Social / Empresa" required />
-              <input type="text" className="w-full px-4 py-3 border rounded-xl bg-slate-50" placeholder="NIT" required />
-              <input type="email" className="w-full px-4 py-3 border rounded-xl bg-slate-50" placeholder="Correo Master (Recepción de Accessos)" required />
+              <input type="text" className="w-full px-4 py-3 border rounded-xl bg-slate-50 text-sm font-bold" placeholder="Razón Social / Empresa" required />
+              <input type="text" className="w-full px-4 py-3 border rounded-xl bg-slate-50 text-sm font-bold" placeholder="NIT de la Empresa" required />
+              <input type="email" className="w-full px-4 py-3 border rounded-xl bg-slate-50 text-sm font-bold" placeholder="Correo Master (Recepción de Accessos)" required />
+              
               <div className="border-t border-slate-100 pt-4 mt-2">
-                <div className="flex items-center gap-2 text-slate-500 text-sm mb-2"><CreditCard size={16}/> Pasarela de Pago Segura</div>
-                <input type="text" className="w-full px-4 py-3 border rounded-xl bg-slate-50 mb-2" placeholder="Número de Tarjeta" required />
+                <div className="flex items-center justify-between text-slate-500 text-sm mb-2">
+                  <span className="flex items-center gap-1 font-bold"><CreditCard size={16}/> Tarjeta de Crédito / Débito</span>
+                  <span className="text-[10px] bg-slate-100 px-2 py-0.5 rounded text-slate-600 font-bold">Visa / Mastercard</span>
+                </div>
+                <input type="text" className="w-full px-4 py-3 border rounded-xl bg-slate-50 mb-2 font-mono text-sm" placeholder="Número de Tarjeta (4000 1234 ...)" required />
                 <div className="flex gap-2">
-                  <input type="text" className="w-1/2 px-4 py-3 border rounded-xl bg-slate-50" placeholder="MM/YY" required />
-                  <input type="text" className="w-1/2 px-4 py-3 border rounded-xl bg-slate-50" placeholder="CVC" required />
+                  <input type="text" className="w-1/2 px-4 py-3 border rounded-xl bg-slate-50 text-sm font-mono" placeholder="MM/YY" required />
+                  <input type="text" className="w-1/2 px-4 py-3 border rounded-xl bg-slate-50 text-sm font-mono" placeholder="CVC" required />
                 </div>
               </div>
-              <button type="submit" disabled={isLoading} className="w-full bg-blue-600 hover:bg-blue-700 text-white font-black py-4 rounded-xl shadow-md transition-all">Procesar Pago Seguro</button>
+              
+              <button type="submit" disabled={isLoading} className="w-full bg-blue-600 hover:bg-blue-700 text-white font-black py-4 rounded-xl shadow-lg shadow-blue-900/30 transition-all text-base">Iniciar Mis 15 Días Gratis</button>
             </form>
           )}
         </div>
@@ -388,50 +397,102 @@ export default function App() {
           <div>
             <div className="p-6 border-b border-slate-800 font-black text-xl flex items-center gap-2"><Key className="text-blue-500"/> Master Admin</div>
             <nav className="p-4 space-y-2">
-              <button className="w-full flex items-center gap-3 px-4 py-3 rounded-xl bg-blue-600 text-white shadow-lg"><Database size={18}/> Tenants (Empresas)</button>
-              <button className="w-full flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-slate-800 text-slate-400"><CreditCard size={18}/> Pasarela & Pagos</button>
+              <button 
+                onClick={() => setSuperAdminTab('TENANTS')} 
+                className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all ${superAdminTab === 'TENANTS' ? 'bg-blue-600 text-white shadow-lg' : 'hover:bg-slate-800 text-slate-400'}`}
+              >
+                <Database size={18}/> Tenants (Empresas)
+              </button>
+              <button 
+                onClick={() => setSuperAdminTab('PAGOS')} 
+                className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all ${superAdminTab === 'PAGOS' ? 'bg-blue-600 text-white shadow-lg' : 'hover:bg-slate-800 text-slate-400'}`}
+              >
+                <CreditCard size={18}/> Pasarela & Pagos
+              </button>
             </nav>
           </div>
           <div className="p-4 border-t border-slate-800"><button onClick={() => setCurrentView('LOGIN')} className="w-full flex items-center justify-center gap-2 px-3 py-2 rounded-lg text-red-400 hover:bg-slate-800 text-xs font-bold transition-colors"><LogOut size={16}/> Cerrar Sesión</button></div>
         </aside>
-        <div className="flex-1 p-8 overflow-y-auto">
-          <div className="flex justify-between items-center mb-8">
-            <h1 className="text-2xl font-black text-slate-800">Control de Entorno Multi-Tenant</h1>
-            <span className="bg-blue-100 text-blue-800 text-xs font-bold px-4 py-2 rounded-lg border border-blue-200">Facturación Anual Proyectada: Q {(tenants.length * 12500).toLocaleString()}</span>
-          </div>
-          
-          <div className="bg-white rounded-2xl p-6 shadow-sm border border-slate-200 mb-8">
-            <h3 className="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2"><UserPlus size={18} className="text-blue-600"/> Aprovisionar Tenant Manualmente</h3>
-            <form onSubmit={handleAddTenant} className="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
-              <div><label className="block text-xs font-bold text-slate-500 mb-1">Razón Social</label><input type="text" value={newTenantForm.companyName} onChange={e => setNewTenantForm({...newTenantForm, companyName: e.target.value})} className="w-full px-4 py-2 border rounded-xl" required/></div>
-              <div><label className="block text-xs font-bold text-slate-500 mb-1">NIT</label><input type="text" value={newTenantForm.nit} onChange={e => setNewTenantForm({...newTenantForm, nit: e.target.value})} className="w-full px-4 py-2 border rounded-xl" required/></div>
-              <div><label className="block text-xs font-bold text-slate-500 mb-1">Correo Master (Envío Auth)</label><input type="email" value={newTenantForm.adminEmail} onChange={e => setNewTenantForm({...newTenantForm, adminEmail: e.target.value})} className="w-full px-4 py-2 border rounded-xl" required/></div>
-              <button type="submit" className="bg-slate-900 hover:bg-slate-800 text-white font-bold py-2.5 rounded-xl transition-all">Crear e Informar</button>
-            </form>
-          </div>
 
-          <div className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
-            <table className="w-full text-left">
-              <thead className="bg-slate-50 text-xs font-bold text-slate-500 uppercase border-b border-slate-200">
-                <tr><th className="p-4">Tenant (Empresa)</th><th className="p-4">Gateway ID</th><th className="p-4">Admin Email</th><th className="p-4">Vencimiento</th><th className="p-4 text-center">Gestión</th></tr>
-              </thead>
-              <tbody>
-                {tenants.map(t => (
-                  <tr key={t.id} className="border-b border-slate-100 last:border-0 hover:bg-slate-50">
-                    <td className="p-4 font-bold text-slate-800">{t.name} <span className="block text-xs text-slate-400 font-normal">NIT: {t.nit} | {t.activeUsers} Usuarios</span></td>
-                    <td className="p-4 text-xs font-mono text-slate-500">{t.gatewayId}</td>
-                    <td className="p-4 text-sm text-blue-600 font-medium">{t.adminEmail}</td>
-                    <td className="p-4 text-sm font-bold text-slate-700">{t.expires}</td>
-                    <td className="p-4 flex justify-center gap-2">
-                      <button onClick={() => alert(`Reenviando credenciales a ${t.adminEmail}`)} className="bg-slate-200 p-2 rounded text-slate-700 hover:bg-slate-300"><Mail size={14}/></button>
-                      <button onClick={() => alert(`Forzando recarga de 50k tokens vía Gateway ${t.gatewayId}`)} className="bg-emerald-100 p-2 rounded text-emerald-700 hover:bg-emerald-200"><Database size={14}/></button>
-                      <button onClick={() => alert(`Bloqueando tenant ${t.id}`)} className="bg-rose-100 p-2 rounded text-rose-700 hover:bg-rose-200"><AlertTriangle size={14}/></button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+        <div className="flex-1 p-8 overflow-y-auto">
+          {superAdminTab === 'TENANTS' ? (
+            <>
+              <div className="flex justify-between items-center mb-8">
+                <h1 className="text-2xl font-black text-slate-800">Control de Entorno Multi-Tenant</h1>
+                <span className="bg-blue-100 text-blue-800 text-xs font-bold px-4 py-2 rounded-lg border border-blue-200">Facturación Anual Proyectada: Q {(tenants.length * 12500).toLocaleString()}</span>
+              </div>
+              
+              <div className="bg-white rounded-2xl p-6 shadow-sm border border-slate-200 mb-8">
+                <h3 className="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2"><UserPlus size={18} className="text-blue-600"/> Aprovisionar Tenant Manualmente</h3>
+                <form onSubmit={handleAddTenant} className="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
+                  <div><label className="block text-xs font-bold text-slate-500 mb-1">Razón Social</label><input type="text" value={newTenantForm.companyName} onChange={e => setNewTenantForm({...newTenantForm, companyName: e.target.value})} className="w-full px-4 py-2 border rounded-xl" required/></div>
+                  <div><label className="block text-xs font-bold text-slate-500 mb-1">NIT</label><input type="text" value={newTenantForm.nit} onChange={e => setNewTenantForm({...newTenantForm, nit: e.target.value})} className="w-full px-4 py-2 border rounded-xl" required/></div>
+                  <div><label className="block text-xs font-bold text-slate-500 mb-1">Correo Master (Envío Auth)</label><input type="email" value={newTenantForm.adminEmail} onChange={e => setNewTenantForm({...newTenantForm, adminEmail: e.target.value})} className="w-full px-4 py-2 border rounded-xl" required/></div>
+                  <button type="submit" className="bg-slate-900 hover:bg-slate-800 text-white font-bold py-2.5 rounded-xl transition-all">Crear e Informar</button>
+                </form>
+              </div>
+
+              <div className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+                <table className="w-full text-left">
+                  <thead className="bg-slate-50 text-xs font-bold text-slate-500 uppercase border-b border-slate-200">
+                    <tr><th className="p-4">Tenant (Empresa)</th><th className="p-4">Gateway ID</th><th className="p-4">Admin Email</th><th className="p-4">Vencimiento</th><th className="p-4 text-center">Gestión</th></tr>
+                  </thead>
+                  <tbody>
+                    {tenants.map(t => (
+                      <tr key={t.id} className="border-b border-slate-100 last:border-0 hover:bg-slate-50">
+                        <td className="p-4 font-bold text-slate-800">{t.name} <span className="block text-xs text-slate-400 font-normal">NIT: {t.nit} | {t.activeUsers} Usuarios</span></td>
+                        <td className="p-4 text-xs font-mono text-slate-500">{t.gatewayId}</td>
+                        <td className="p-4 text-sm text-blue-600 font-medium">{t.adminEmail}</td>
+                        <td className="p-4 text-sm font-bold text-slate-700">{t.expires}</td>
+                        <td className="p-4 flex justify-center gap-2">
+                          <button onClick={() => alert(`Reenviando credenciales a ${t.adminEmail}`)} className="bg-slate-200 p-2 rounded text-slate-700 hover:bg-slate-300"><Mail size={14}/></button>
+                          <button onClick={() => alert(`Forzando recarga de 50k tokens vía Gateway ${t.gatewayId}`)} className="bg-emerald-100 p-2 rounded text-emerald-700 hover:bg-emerald-200"><Database size={14}/></button>
+                          <button onClick={() => alert(`Bloqueando tenant ${t.id}`)} className="bg-rose-100 p-2 rounded text-rose-700 hover:bg-rose-200"><AlertTriangle size={14}/></button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </>
+          ) : (
+            <>
+              <div className="flex justify-between items-center mb-8">
+                <h1 className="text-2xl font-black text-slate-800">Monitoreo de Pasarela y Suscripciones (Trial 15 Días)</h1>
+                <span className="bg-emerald-100 text-emerald-800 text-xs font-bold px-4 py-2 rounded-lg border border-emerald-200">Webhook Activo: /api/payments/webhook</span>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
+                  <p className="text-xs font-bold text-slate-400 uppercase">Suscripciones en Trial</p>
+                  <h3 className="text-4xl font-black text-blue-600 mt-2">1</h3>
+                </div>
+                <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
+                  <p className="text-xs font-bold text-slate-400 uppercase">Pagos Exitosos (Anual)</p>
+                  <h3 className="text-4xl font-black text-emerald-600 mt-2">12</h3>
+                </div>
+                <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
+                  <p className="text-xs font-bold text-slate-400 uppercase">Tarjetas Rechazadas / Fallidas</p>
+                  <h3 className="text-4xl font-black text-rose-600 mt-2">0</h3>
+                </div>
+              </div>
+
+              <div className="bg-white rounded-2xl p-8 shadow-sm border border-slate-200">
+                <h3 className="text-lg font-bold text-slate-800 mb-4">Configuración de Llaves de Pasarela</h3>
+                <div className="space-y-4 max-w-xl">
+                  <div>
+                    <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Stripe / Pasarela Publishable Key</label>
+                    <input type="text" className="w-full px-4 py-2.5 border rounded-xl font-mono text-xs bg-slate-50" defaultValue="pk_live_51Nx..."/>
+                  </div>
+                  <div>
+                    <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Stripe / Pasarela Secret Key</label>
+                    <input type="password" className="w-full px-4 py-2.5 border rounded-xl font-mono text-xs bg-slate-50" defaultValue="sk_live_51Nx..."/>
+                  </div>
+                  <button onClick={() => alert("Configuración de pasarela guardada correctamente.")} className="bg-blue-600 hover:bg-blue-700 text-white font-bold px-6 py-3 rounded-xl shadow transition-all text-sm">Guardar Cambios de Pasarela</button>
+                </div>
+              </div>
+            </>
+          )}
         </div>
       </div>
     );
@@ -944,7 +1005,7 @@ export default function App() {
                 </div>
               </div>
 
-              {/* LISTA DE EVENTOS POR VENCER AGRUPADOS POR CATEGORÍA (RESTAURADO Y FLEXIBLE) */}
+              {/* LISTA DE EVENTOS POR VENCER AGRUPADOS POR CATEGORÍA */}
               <div className="bg-white rounded-2xl p-8 shadow-sm border border-slate-200">
                 <h3 className="text-base font-black text-slate-800 uppercase tracking-wider mb-6 flex items-center gap-2"><AlertCircle size={20} className="text-amber-500"/> Lista de Eventos por Vencer (Agrupados por Categoría)</h3>
                 
